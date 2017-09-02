@@ -51,7 +51,9 @@ def pr(num):
         other_user, branch = label.split(":")
         remote_name = "\\n" + other_user + "\\t"
         if remote_name not in remotes:
-            p = subprocess.Popen(["git", "remote", "add", other_user,
+            print(other_user)
+            print(repo)
+            p = subprocess.Popen(["git", "remote", "add", "{other_user}",
                                  f'git@github.com:{other_user}/{repo}'])
             p.communicate()
         p = subprocess.Popen(["git", "fetch", other_user],
@@ -95,6 +97,85 @@ def push():
         print("This command must be used after git hub pr.")
         sys.exit(1)
 
+def search(keyword):
+    try:
+        open_prs = False
+        closed_prs = False
+        f = open("pull-requests.toml","r")
+        for line in f:
+            num = line.split(" ",1)[0]
+            pull = line.split(" ",1)[1]
+            if keyword in pull:
+                if not open_prs:
+                    click.echo("OPEN pull requests")
+                    open_prs = True
+                click.echo('{0}  {1}'.format(num, pull[1:len(pull)-1]))
+
+        #TODO - update to closed
+        for line in f:
+            num = line.split(" ",1)[0]
+            pull = line.split(" ",1)[1]
+            if keyword in pull:
+                if not open_prs:
+                    click.echo("CLOSED pull requests")
+                    open_prs = True
+                click.echo('{0}  {1}'.format(num, pull[1:len(pull)-1]))
+
+        if not open_prs and not closed_prs:
+            click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
+    except FileNotFoundError as e:
+        sync()
+        search(keyword)
+
+def sync():
+    # runs git and gets user and repo of current folder.
+    process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE)
+    remotes = str(process.stdout.read())
+    url = remotes.split(" ", 1)[0]  # gets the fetch url
+    url = url.split("\\t", 1)[0]  # takes out extra info
+    arguments = url.split(".com/")[1]  # gets just the username/repo.git
+    arguments = arguments[:len(arguments) - 4]  # takes out ".git"
+    username, repo = arguments.split("/")
+
+    # gets token from config folder.
+    try:
+        import os
+        with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
+            yaml_file = str(yaml.load(stream))
+            token = yaml_file.split("=")[1].strip()
+
+    except (IndexError, FileNotFoundError) as e:
+        print(textwrap.dedent("""Needs an authentification token in: ~/.config/git-hub.yaml
+            file simply says: token = abc123
+            Visit https://help.github.com/articles/
+            creating-a-personal-access-token-for-the-command-line/"""))
+        sys.exit(1)
+
+    # gets pr and runs command.
+    try:
+        g = github.Github(token)
+        process = subprocess.Popen(["touch", "pull-requests.toml"], stdout=subprocess.PIPE)
+        f = open("pull-requests.toml","w")
+        closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")      #fetches all open pull requests
+
+        #figure out how to properly parse it into TOML format
+        count = 0       #add count to tell how many are open vs closed pull requests
+        output = ""
+        for pr in closed_prs:
+            count = count + 1
+            output = output + 'pr{0}  {1}\n'.format(pr.number, pr.title)
+        f.write(str(count)+"\n")
+        f.write(output)
+
+        open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
+        for pr in open_prs:
+            f.write('pr{0}  {1}\n'.format(pr.number, pr.title))
+
+    except github.BadCredentialsException as e:
+        print(e)
+        print("The authentification token is not valid.")
+        sys.exit(1)
+
 
 @click.group()
 def cli():
@@ -111,6 +192,13 @@ def hub(command, args):
 
     elif command == "push":
         push()
+
+    elif command == "search":
+        params = ' '.join(args)         #concatenates all words as search keywords
+        search(params)
+
+    elif command == "sync":
+        sync()
 
     else:
         print("invalid command")
