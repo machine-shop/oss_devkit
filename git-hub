@@ -99,29 +99,47 @@ def push():
         sys.exit(1)
 
 def search(keyword):
+    """Searches open and closed pull request comments for specified keyword.
+    Opens pull-requests.toml file in .git folder to fetch pull requests.
+
+    Parameters
+    ----------
+    keyword : string
+        Search string were trying to match
+    """
     try:
         open_prs = False
         closed_prs = False
         f = open("./.git/pull-requests.toml","r")
-        pr_dict = toml.load(f)
-        for line in f:
-            num = line.split(" ",1)[0]
-            pull = line.split(" ",1)[1]
+        pr_dict = toml.load(f)      #fetches toml file and creates a dictionary
+        open_dict = pr_dict['open pull requests']
+        closed_dict = pr_dict['closed pull requests']
+
+        for key in open_dict.keys():        #iterates through and checks if open pull requsts have keyword
+            pull = open_dict[key]
             if keyword in pull:
                 if not open_prs:
                     click.echo("OPEN pull requests")
                     open_prs = True
-                click.echo('{0}  {1}'.format(num, pull[1:len(pull)-1]))
+                click.echo('{0}  {1}'.format(key, pull))
 
+        for key in closed_dict.keys():
+            pull = closed_dict[key]
+            if keyword in pull:
+                if not closed_prs:
+                    click.echo("OPEN pull requests")
+                    closed_prs = True
+                click.echo('{0}  {1}'.format(key, pull))
 
-        if not open_prs and not closed_prs:
+        if not open_prs and not closed_prs:     #outputs if keyword was not contained in pull requets comments
             click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
-    except FileNotFoundError as e:
+    except OSError as e:
         #if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
         sync()
         search(keyword)
 
 def sync():
+    """Updates and saves pull-requests in pull-requests.toml in the .git folder. """
     # runs git and gets user and repo of current folder.
     process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE)
     remotes = str(process.stdout.read())
@@ -145,7 +163,7 @@ def sync():
             creating-a-personal-access-token-for-the-command-line/"""))
         sys.exit(1)
 
-    # gets pr and runs command.
+    # saves pr into toml file
     try:
         g = github.Github(token)
         filepath = os.path.join('./.git/', 'pull-requests.toml')
