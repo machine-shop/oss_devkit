@@ -103,6 +103,7 @@ def search(keyword):
         open_prs = False
         closed_prs = False
         f = open("./.git/pull-requests.toml","r")
+        pr_dict = toml.load(f)
         for line in f:
             num = line.split(" ",1)[0]
             pull = line.split(" ",1)[1]
@@ -112,15 +113,6 @@ def search(keyword):
                     open_prs = True
                 click.echo('{0}  {1}'.format(num, pull[1:len(pull)-1]))
 
-        #TODO - update to closed
-        for line in f:
-            num = line.split(" ",1)[0]
-            pull = line.split(" ",1)[1]
-            if keyword in pull:
-                if not open_prs:
-                    click.echo("CLOSED pull requests")
-                    open_prs = True
-                click.echo('{0}  {1}'.format(num, pull[1:len(pull)-1]))
 
         if not open_prs and not closed_prs:
             click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
