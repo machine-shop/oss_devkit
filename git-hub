@@ -6,6 +6,7 @@ import click
 import sys
 import textwrap
 import json
+import toml
 import os
 
 
@@ -101,7 +102,7 @@ def search(keyword):
     try:
         open_prs = False
         closed_prs = False
-        f = open("pull-requests.toml","r")
+        f = open("./.git/pull-requests.toml","r")
         for line in f:
             num = line.split(" ",1)[0]
             pull = line.split(" ",1)[1]
@@ -124,6 +125,7 @@ def search(keyword):
         if not open_prs and not closed_prs:
             click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
     except FileNotFoundError as e:
+        #if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
         sync()
         search(keyword)
 
@@ -154,22 +156,24 @@ def sync():
     # gets pr and runs command.
     try:
         g = github.Github(token)
-        process = subprocess.Popen(["touch", "pull-requests.toml"], stdout=subprocess.PIPE)
-        f = open("pull-requests.toml","w")
-        closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")      #fetches all open pull requests
+        filepath = os.path.join('./.git/', 'pull-requests.toml')
+        f = open(filepath, "w")
+        to_write = "['open pull requests']\n"   #later will be convereted to toml to store
 
-        #figure out how to properly parse it into TOML format
-        count = 0       #add count to tell how many are open vs closed pull requests
-        output = ""
-        for pr in closed_prs:
-            count = count + 1
-            output = output + 'pr{0}  {1}\n'.format(pr.number, pr.title)
-        f.write(str(count)+"\n")
-        f.write(output)
-
+        #creates dictionaries in toml format as we scan though pull requests
         open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
         for pr in open_prs:
-            f.write('pr{0}  {1}\n'.format(pr.number, pr.title))
+            to_write = to_write + "{0} = '{1}'\n".format(pr.number, pr.title)
+
+        to_write = to_write + "['closed pull requests']\n"
+        closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
+        for pr in closed_prs:
+            to_write = to_write + "{0} = '{1}'\n".format(pr.number, pr.title)
+
+        #converts it to toml and stores in file
+        toml_string = toml.loads(to_write)
+        toml.dump(toml_string, f)
+
 
     except github.BadCredentialsException as e:
         print(e)
