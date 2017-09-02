@@ -9,94 +9,94 @@ import json
 import toml
 import os
 
-
-def pr(num):
-    """Pulls down and checkout the branch of the pr.
-
-    This will run the following commands in the terminal:
-    "git remote add user git@github.com:user/repo",
-    "git fetch user",
-    "git checkout -b pr/num user/branch"
-
-    Parameters
-    ----------
-    num : integer
-        The number of the pull request.
-    """
-    process = subprocess.Popen("git remote -v", stdout=subprocess.PIPE)
-    remotes = str(process.stdout.read())
-    url = remotes.split(" ", 1)[0]  # gets the fetch url
-    url = url.split("\\t", 1)[1]  # takes out extra info
-    arguments = url.split(".com:")[1]  # gets just the username/repo.git
-    arguments = arguments[:len(arguments) - 4]  # takes out ".git"
-    username, repo = arguments.split("/")
-
-    # gets token from config folder.
-    try:
-        with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
-            yaml_file = str(yaml.load(stream))
-            token = yaml_file.split("=")[1].strip()
-
-    except (IndexError, FileNotFoundError) as e:
-        print(textwrap.dedent("""Needs an authentification token in: ~/.config/git-hub.yaml
-            file simply says: token = abc123
-            Visit https://help.github.com/articles/
-            creating-a-personal-access-token-for-the-command-line/"""))
-        sys.exit(1)
-
-    # gets pr and runs command.
-    try:
-        g = github.Github(token)
-        pr = g.get_user(username).get_repo(repo).get_pull(num)
-        label = pr.head.label
-        other_user, branch = label.split(":")
-        remote_name = "\\n" + other_user + "\\t"
-        if remote_name not in remotes:
-            print(other_user)
-            print(repo)
-            p = subprocess.Popen(["git", "remote", "add", "{other_user}",
-                                 f'git@github.com:{other_user}/{repo}'])
-            p.communicate()
-        p = subprocess.Popen(["git", "fetch", other_user],
-                             stdout=subprocess.PIPE)
-        p.stdout.read()
-        subprocess.Popen(["git", "checkout", "-b",
-                         f'pr/{num}', f'{other_user}/{branch}'])
-        with open(".git_hub_cache", "w") as outfile:
-            data = {"user": other_user, "pr": f'pr/{num}', "branch": branch}
-            json.dump(data, outfile)
-
-    except github.BadCredentialsException as e:
-        print(e)
-        print("The authentification token is not valid.")
-        sys.exit(1)
-
-    except github.UnknownObjectException as e:
-        print(e)
-        print(f'There is no pr with number {num}.')
-        sys.exit(1)
-
-
-def push():
-    """Pushes changes back to a branch.
-
-    This will run the following command:
-    "git push user pr/num:branch"
-
-    """
-    try:
-        with open(".git_hub_cache") as json_file:
-            data = json.load(json_file)
-            other_user = data["user"]
-            pr = data["pr"]
-            branch = data["branch"]
-            p = subprocess.Popen(["git", "push", other_user,
-                                 f'{pr}:{branch}'], stdout=subprocess.PIPE)
-            p.stdout.read()
-    except FileNotFoundError as e:
-        print(e)
-        print("This command must be used after git hub pr.")
-        sys.exit(1)
+#
+# def pr(num):
+#     """Pulls down and checkout the branch of the pr.
+#
+#     This will run the following commands in the terminal:
+#     "git remote add user git@github.com:user/repo",
+#     "git fetch user",
+#     "git checkout -b pr/num user/branch"
+#
+#     Parameters
+#     ----------
+#     num : integer
+#         The number of the pull request.
+#     """
+#     process = subprocess.Popen("git remote -v", stdout=subprocess.PIPE)
+#     remotes = str(process.stdout.read())
+#     url = remotes.split(" ", 1)[0]  # gets the fetch url
+#     url = url.split("\\t", 1)[1]  # takes out extra info
+#     arguments = url.split(".com:")[1]  # gets just the username/repo.git
+#     arguments = arguments[:len(arguments) - 4]  # takes out ".git"
+#     username, repo = arguments.split("/")
+#
+#     # gets token from config folder.
+#     try:
+#         with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
+#             yaml_file = str(yaml.load(stream))
+#             token = yaml_file.split("=")[1].strip()
+#
+#     except (IndexError, FileNotFoundError) as e:
+#         print(textwrap.dedent("""Needs an authentification token in: ~/.config/git-hub.yaml
+#             file simply says: token = abc123
+#             Visit https://help.github.com/articles/
+#             creating-a-personal-access-token-for-the-command-line/"""))
+#         sys.exit(1)
+#
+#     # gets pr and runs command.
+#     try:
+#         g = github.Github(token)
+#         pr = g.get_user(username).get_repo(repo).get_pull(num)
+#         label = pr.head.label
+#         other_user, branch = label.split(":")
+#         remote_name = "\\n" + other_user + "\\t"
+#         if remote_name not in remotes:
+#             print(other_user)
+#             print(repo)
+#             p = subprocess.Popen(["git", "remote", "add", "{other_user}",
+#                                  f'git@github.com:{other_user}/{repo}'])
+#             p.communicate()
+#         p = subprocess.Popen(["git", "fetch", other_user],
+#                              stdout=subprocess.PIPE)
+#         p.stdout.read()
+#         subprocess.Popen(["git", "checkout", "-b",
+#                          f'pr/{num}', f'{other_user}/{branch}'])
+#         with open(".git_hub_cache", "w") as outfile:
+#             data = {"user": other_user, "pr": f'pr/{num}', "branch": branch}
+#             json.dump(data, outfile)
+#
+#     except github.BadCredentialsException as e:
+#         print(e)
+#         print("The authentification token is not valid.")
+#         sys.exit(1)
+#
+#     except github.UnknownObjectException as e:
+#         print(e)
+#         print(f'There is no pr with number {num}.')
+#         sys.exit(1)
+#
+#
+# def push():
+#     """Pushes changes back to a branch.
+#
+#     This will run the following command:
+#     "git push user pr/num:branch"
+#
+#     """
+#     try:
+#         with open(".git_hub_cache") as json_file:
+#             data = json.load(json_file)
+#             other_user = data["user"]
+#             pr = data["pr"]
+#             branch = data["branch"]
+#             p = subprocess.Popen(["git", "push", other_user,
+#                                  f'{pr}:{branch}'], stdout=subprocess.PIPE)
+#             p.stdout.read()
+#     except FileNotFoundError as e:
+#         print(e)
+#         print("This command must be used after git hub pr.")
+#         sys.exit(1)
 
 def search(keyword):
     """Searches open and closed pull request comments for specified keyword.
@@ -133,7 +133,7 @@ def search(keyword):
 
         if not open_prs and not closed_prs:     #outputs if keyword was not contained in pull requets comments
             click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
-    except OSError as e:
+    except (OSError, IOError) as e:
         #if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
         sync()
         search(keyword)
