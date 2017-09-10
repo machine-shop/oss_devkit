@@ -111,7 +111,15 @@ def search(keyword, user, comment, number, branch):
     Parameters
     ----------
     keyword : string
-        Search string were trying to match
+        Searches if any part of user, branch, comment, or number match
+    user : string
+        Search by PR username
+    comment : string
+        Search by PR comment
+    number : string
+        Search by PR number
+    branch : string
+        Search by PR branch
     """
     try:
         open_prs = False
