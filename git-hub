@@ -104,11 +104,7 @@ def push():
         print("This command must be used after git hub pr.")
         sys.exit(1)
 
-@click.command()
-@click.option('--user', '-u', default="")
-@click.option('--comment', '-c', default="")
-@click.option('--number', '-n', default="")
-def search(keyword, user, comment, number):
+def search(keyword, user, comment, number, branch):
     """Searches open and closed pull request comments for specified keyword.
     Opens pull-requests.toml file in .git folder to fetch pull requests.
 
@@ -117,11 +113,9 @@ def search(keyword, user, comment, number):
     keyword : string
         Search string were trying to match
     """
-    print("USER: ",user," comment: ",comment," number: ",number)
     try:
         open_prs = False
         closed_prs = False
-        #TODO - make sure in correct directory
         pathToGit = './'
         while not any(fname == '.git' for fname in os.listdir(pathToGit)):  #if not in directory with .git, keep going back to find file
             pathToGit = pathToGit+"../"
@@ -133,27 +127,50 @@ def search(keyword, user, comment, number):
 
         for key in open_dict.keys():        #iterates through and checks if open pull requsts have keyword
             pull = open_dict[key]
-            if keyword in pull:
-                if not open_prs:
-                    click.echo("OPEN pull requests")
-                    open_prs = True
-                click.echo('{0}  {1}'.format(key, pull))
+            if keyword:         #checks keyword
+                if keyword.upper() in pull.upper() or keyword in str(key):
+                    if not open_prs:
+                        click.echo("OPEN pull requests")
+                        open_prs = True
+                    click.echo('{0}  {1}'.format(key, pull))
+            else:               #checks for all other parameters
+                tempUser, tempBranch = pull.split('/', 1)
+                tempBranch, tempComment = tempBranch.split(': ',1)
+                if number in str(key) and comment.upper() in tempComment.upper() and user.upper() in tempUser.upper() and branch.upper() in tempBranch.upper():
+                    if not open_prs:
+                        click.echo("OPEN pull requests")
+                        open_prs = True
+                    click.echo('{0}  {1}'.format(key, pull))
 
-        if open_prs:
-            click.echo()
-            click.echo("--------------------------------")
-            click.echo()
+
 
         for key in closed_dict.keys():
             pull = closed_dict[key]
-            if keyword in pull:
-                if not closed_prs:
-                    click.echo("OPEN pull requests")
-                    closed_prs = True
-                click.echo('{0}  {1}'.format(key, pull))
+            if keyword:
+                if keyword.upper() in pull.upper() or keyword in str(key):
+                    if not closed_prs:
+                        if open_prs:
+                            click.echo()
+                            click.echo("--------------------------------")
+                            click.echo()
+                        click.echo("CLOSED pull requests")
+                        closed_prs = True
+                    click.echo('{0}  {1}'.format(key, pull))
+            else:
+                tempUser, tempBranch = pull.split('/', 1)
+                tempBranch, tempComment = tempBranch.split(': ',1)
+                if number in str(key) and comment.upper() in tempComment.upper() and user.upper() in tempUser.upper() and branch.upper() in tempBranch.upper():
+                    if not closed_prs:
+                        if open_prs:
+                            click.echo()
+                            click.echo("--------------------------------")
+                            click.echo()
+                        click.echo("CLOSED pull requests")
+                        closed_prs = True
+                    click.echo('{0}  {1}'.format(key, pull))
 
         if not open_prs and not closed_prs:     #outputs if keyword was not contained in pull requets comments
-            click.echo("Could not find '{0}' in pull requests. Update your pull requests with 'git hub sync' and try again.".format(keyword))
+            click.echo("Could not find in pull requests. Update your pull requests with 'git hub sync' and try again.")
     except (OSError, IOError) as e:
         #if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
         sync()
@@ -186,7 +203,7 @@ def sync():
             request.add_header('Authorization', 'token %s' % token)
             response = urlopen(request)
             response = json.loads(response.read().decode('utf-8'))
-            to_write = to_write + "{0} = '{1}-{2}:{3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
+            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
 
         to_write = to_write + "['closed pull requests']\n"
         closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
@@ -196,7 +213,7 @@ def sync():
             request.add_header('Authorization', 'token %s' % token)
             response = urlopen(request)
             response = json.loads(response.read().decode('utf-8'))
-            to_write = to_write + "{0} = '{1}-{2}:{3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
+            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
 
         #converts it to toml and stores in file
         toml_string = toml.loads(to_write)
@@ -217,7 +234,12 @@ def cli():
 @cli.command()
 @click.argument("command", default="")
 @click.argument("args", nargs=-1)
-def hub(command, args):
+@click.option('--user', '-u', default="", help = "search by user")
+@click.option('--branch', '-b', default="", help = "search by branch")
+@click.option('--comment', '-c', default="", help = "search by comment")
+@click.option('--number', '-n', default="", help = "search by PR number")
+@click.option('--keyword', '-k', default="", help = "search by all parameters")
+def hub(command, args, user, comment, number, keyword, branch):
     if command == "pr":
         pr_num = int(args[0])
         pr(pr_num)
@@ -226,8 +248,7 @@ def hub(command, args):
         push()
 
     elif command == "search":
-        params = ' '.join(args)         #concatenates all words as search keywords
-        search(params)
+        search(keyword, user, comment, number, branch)
 
     elif command == "sync":
         sync()
