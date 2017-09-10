@@ -8,7 +8,7 @@ import textwrap
 import json
 import toml
 import os
-import requests
+from urllib.request import urlopen, Request
 
 def login():
     process = subprocess.Popen(["git","remote","-v"], stdout=subprocess.PIPE)
@@ -26,6 +26,7 @@ def getToken():
         with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
             yaml_file = str(yaml.load(stream))
             token = yaml_file.split("=")[1].strip()
+            return token
 
     except (IndexError, FileNotFoundError) as e:
         print(textwrap.dedent("""Needs an authentification token in: ~/.config/git-hub.yaml
@@ -165,8 +166,6 @@ def sync():
 
     # saves pr into toml file
     try:
-        
-
         g = github.Github(token)
         pathToGit = './'
         while not any(fname == '.git' for fname in os.listdir(pathToGit)):  #if not in directory with .git, keep going back to find file
@@ -182,12 +181,22 @@ def sync():
         #creates dictionaries in toml format as we scan though pull requests
         open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
         for pr in open_prs:
-            to_write = to_write + "{0} = '{1}:{2}'\n".format(pr.number, pr.user.name ,pr.title)
+            url =  'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
+            request = Request(url)
+            request.add_header('Authorization', 'token %s' % token)
+            response = urlopen(request)
+            response = json.loads(response.read().decode('utf-8'))
+            to_write = to_write + "{0} = '{1}-{2}:{3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
 
         to_write = to_write + "['closed pull requests']\n"
         closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
         for pr in closed_prs:
-            to_write = to_write + "{0} = '{1}:{2}'\n".format(pr.number, pr.user.name ,pr.title)
+            url =  'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
+            request = Request(url)
+            request.add_header('Authorization', 'token %s' % token)
+            response = urlopen(request)
+            response = json.loads(response.read().decode('utf-8'))
+            to_write = to_write + "{0} = '{1}-{2}:{3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
 
         #converts it to toml and stores in file
         toml_string = toml.loads(to_write)
