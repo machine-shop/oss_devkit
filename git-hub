@@ -10,8 +10,9 @@ import toml
 import os
 from urllib.request import urlopen, Request
 
+
 def login():
-    process = subprocess.Popen(["git","remote","-v"], stdout=subprocess.PIPE)
+    process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE)
     remotes = str(process.stdout.read())
     url = remotes.split(" ", 1)[0]  # gets the fetch url
     arguments = url.split(".com")[1]  # gets just the username/repo.git
@@ -19,6 +20,7 @@ def login():
     arguments = arguments.split(".git")[0]  # takes out ".git"
     username, repo = arguments.split("/")
     return (username, repo)
+
 
 def getToken():
     # gets token from config folder.
@@ -34,6 +36,7 @@ def getToken():
             Visit https://help.github.com/articles/
             creating-a-personal-access-token-for-the-command-line/"""))
         sys.exit(1)
+
 
 def pr(num):
     """Pulls down and checkout the branch of the pr.
@@ -57,12 +60,10 @@ def pr(num):
         pr = g.get_user(username).get_repo(repo).get_pull(num)
         label = pr.head.label
         other_user, branch = label.split(":")
-        process = subprocess.Popen(["git","remote","-v"], stdout=subprocess.PIPE)
+        process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE)
         remotes = str(process.stdout.read())
         remote_name = "\\n" + other_user + "\\t"
         if remote_name not in remotes:
-            print(other_user)
-            print(repo)
             p = subprocess.Popen(["git", "remote", "add", other_user, f'git@github.com:{other_user}/{repo}'])
             p.communicate()
         p = subprocess.Popen(["git", "fetch", other_user],
@@ -84,6 +85,7 @@ def pr(num):
         print(f'There is no pr with number {num}.')
         sys.exit(1)
 
+
 def push():
     """Pushes changes back to a branch.
 
@@ -104,8 +106,10 @@ def push():
         print("This command must be used after git hub pr.")
         sys.exit(1)
 
+
 def search(keyword, user, comment, number, branch):
     """Searches open and closed pull request comments for specified keyword.
+
     Opens pull-requests.toml file in .git folder to fetch pull requests.
 
     Parameters
@@ -124,65 +128,84 @@ def search(keyword, user, comment, number, branch):
     try:
         open_prs = False
         closed_prs = False
-        pathToGit = './'
-        while not any(fname == '.git' for fname in os.listdir(pathToGit)):  #if not in directory with .git, keep going back to find file
-            pathToGit = pathToGit+"../"
-        pathToGit = pathToGit+".git/git-hub/pull-requests.toml"
-        f = open(pathToGit,"r")
-        pr_dict = toml.load(f)      #fetches toml file and creates a dictionary
-        open_dict = pr_dict['open pull requests']
+        path_to_git = './'
+        count = 0
+        while count < 4 and not any(fname == '.git' for fname in os.listdir(path_to_git)):
+            path_to_git = path_to_git+"../"
+            count = count + 1           # if still not in a directory with .git after going back 4 times, exits and errors
+        if(count == 4 and not any(fname == '.git' for fname in os.listdir(path_to_git))):
+            click.echo("Not in the correct directory. Make sure you are in a directory containing your .git file.")
+            return
+        path_to_git = path_to_git+".git/git-hub/pull-requests.toml"
+        f = open(path_to_git, "r")
+        pr_dict = toml.load(f)      # fetches toml file and creates a dictionary
+        dict = pr_dict['open pull requests']
         closed_dict = pr_dict['closed pull requests']
 
-        for key in open_dict.keys():        #iterates through and checks if open pull requsts have keyword
-            pull = open_dict[key]
-            if keyword:         #checks keyword
-                if keyword.upper() in pull.upper() or keyword in str(key):
-                    if not open_prs:
-                        click.echo("OPEN pull requests")
-                        open_prs = True
-                    click.echo('{0}  {1}'.format(key, pull))
-            else:               #checks for all other parameters
-                tempUser, tempBranch = pull.split('/', 1)
-                tempBranch, tempComment = tempBranch.split(': ',1)
-                if number in str(key) and comment.upper() in tempComment.upper() and user.upper() in tempUser.upper() and branch.upper() in tempBranch.upper():
-                    if not open_prs:
-                        click.echo("OPEN pull requests")
-                        open_prs = True
-                    click.echo('{0}  {1}'.format(key, pull))
-
-
-
-        for key in closed_dict.keys():
-            pull = closed_dict[key]
-            if keyword:
-                if keyword.upper() in pull.upper() or keyword in str(key):
-                    if not closed_prs:
-                        if open_prs:
-                            click.echo()
-                            click.echo("--------------------------------")
-                            click.echo()
-                        click.echo("CLOSED pull requests")
-                        closed_prs = True
-                    click.echo('{0}  {1}'.format(key, pull))
-            else:
-                tempUser, tempBranch = pull.split('/', 1)
-                tempBranch, tempComment = tempBranch.split(': ',1)
-                if number in str(key) and comment.upper() in tempComment.upper() and user.upper() in tempUser.upper() and branch.upper() in tempBranch.upper():
-                    if not closed_prs:
-                        if open_prs:
-                            click.echo()
-                            click.echo("--------------------------------")
-                            click.echo()
-                        click.echo("CLOSED pull requests")
-                        closed_prs = True
-                    click.echo('{0}  {1}'.format(key, pull))
-
-        if not open_prs and not closed_prs:     #outputs if keyword was not contained in pull requets comments
+        open_prs = findMatch(True, dict, keyword, user, comment, number, branch, False, False)
+        closed_prs = findMatch(False, closed_dict, keyword, user, comment, number, branch, False, open_prs)
+        if not open_prs and not closed_prs:     # outputs if keyword was not contained in pull requets comments
             click.echo("Could not find in pull requests. Update your pull requests with 'git hub sync' and try again.")
     except (OSError, IOError) as e:
-        #if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
+        # if pull-requests.toml hasnt been created yet calls sync and then reties to fetch
         sync()
         search(keyword)
+
+
+def findMatch(open_or_closed, dictionary, keyword, user, comment, number, branch, appeared_before, line):
+    """Helper function that finds all matches in the given dictionary that fits the specified parameters
+
+    Parameters
+    ----------
+    open_or_closed : boolean
+        Whether looking in closed PR or open PR
+    dictionary : dictionary
+        pull-requests.toml information mapping PR number to info
+    keyword : string
+        Searches if any part of user, branch, comment, or number match
+    user : string
+        Search by PR username
+    comment : string
+        Search by PR comment
+    number : string
+        Search by PR number
+    branch : string
+        Search by PR branch
+    appeared_before : boolean
+        Whether the search match is the first match
+    line : boolean
+        Whether to draw lines before listing closed pull requests
+    """
+    for key in dictionary:        # iterates through and checks if open pull requsts have keyword
+        pull = dictionary[key]
+        if keyword:         # checks keyword
+            if keyword.upper() in pull.upper() or keyword in str(key):
+                if not appeared_before:
+                    draw_intro(open_or_closed, line)
+                    appeared_before = True
+                click.echo('{0}  {1}'.format(key, pull))
+        else:               # checks for all other parameters
+            temp_user, temp_branch = pull.split('/', 1)
+            temp_branch, temp_comment = temp_branch.split(': ', 1)
+            if number in str(key) and comment.upper() in temp_comment.upper() and user.upper() in temp_user.upper() and branch.upper() in temp_branch.upper():
+                if not appeared_before:
+                    draw_intro(open_or_closed, line)
+                    appeared_before = True
+                click.echo('{0}  {1}'.format(key, pull))
+    return appeared_before
+
+
+def draw_intro(open_or_closed, line):
+    """Helper function that draws introductary to open and closed dictionary in search function"""
+    if open_or_closed:
+        click.echo("OPEN pull requests")
+    else:
+        if line:
+            click.echo()
+            click.echo("--------------------------------")
+            click.echo()
+        click.echo("CLOSED pull requests")
+
 
 def sync():
     """Updates and saves pull-requests in pull-requests.toml in the .git folder. """
@@ -192,42 +215,44 @@ def sync():
     # saves pr into toml file
     try:
         g = github.Github(token)
-        pathToGit = './'
-        while not any(fname == '.git' for fname in os.listdir(pathToGit)):  #if not in directory with .git, keep going back to find file
-            pathToGit = pathToGit+"../"
-        pathToGit = pathToGit+".git/"
-        if not any(fname == 'git-hub' for fname in os.listdir(pathToGit)):
-            os.makedirs(pathToGit+"git-hub/")
-        pathToGit = pathToGit+"git-hub/"
-        filepath = os.path.join(pathToGit, 'pull-requests.toml')
+        path_to_git = './'
+        count = 0
+        while count < 4 and not any(fname == '.git' for fname in os.listdir(path_to_git)):  # if not in directory with .git, keep going back to find file
+            path_to_git = path_to_git+"../"
+            count = count + 1
+        if(count == 4 and not any(fname == '.git' for fname in os.listdir(path_to_git))):
+            click.echo("Not in the correct directory. Make sure you are in a directory containing your .git file.")
+            return
+        path_to_git = path_to_git+".git/"
+        if not any(fname == 'git-hub' for fname in os.listdir(path_to_git)):
+            os.makedirs(path_to_git+"git-hub/")
+        path_to_git = path_to_git+"git-hub/"
+        filepath = os.path.join(path_to_git, 'pull-requests.toml')
         f = open(filepath, "w")
-        to_write = "['open pull requests']\n"   #later will be convereted to toml to store
+        to_write = "['open pull requests']\n"   # later will be convereted to toml to store
 
-        #creates dictionaries in toml format as we scan though pull requests
+        # creates dictionaries in toml format as we scan though pull requests
         open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
         for pr in open_prs:
-            url =  'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
+            url = 'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
             request = Request(url)
             request.add_header('Authorization', 'token %s' % token)
             response = urlopen(request)
             response = json.loads(response.read().decode('utf-8'))
-            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
+            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref'), pr.title)
 
         to_write = to_write + "['closed pull requests']\n"
         closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
         for pr in closed_prs:
-            url =  'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
+            url = 'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(username, repo, pr.number)
             request = Request(url)
             request.add_header('Authorization', 'token %s' % token)
             response = urlopen(request)
             response = json.loads(response.read().decode('utf-8'))
-            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref') ,pr.title)
-
-        #converts it to toml and stores in file
+            to_write = to_write + "{0} = '{1}/{2}: {3}'\n".format(pr.number, pr.user.name, response.get('head').get('ref'), pr.title)
+        # converts it to toml and stores in file
         toml_string = toml.loads(to_write)
         toml.dump(toml_string, f)
-
-
     except github.BadCredentialsException as e:
         print(e)
         print("The authentification token is not valid.")
@@ -242,11 +267,11 @@ def cli():
 @cli.command()
 @click.argument("command", default="")
 @click.argument("args", nargs=-1)
-@click.option('--user', '-u', default="", help = "search by user")
-@click.option('--branch', '-b', default="", help = "search by branch")
-@click.option('--comment', '-c', default="", help = "search by comment")
-@click.option('--number', '-n', default="", help = "search by PR number")
-@click.option('--keyword', '-k', default="", help = "search by all parameters")
+@click.option('--user', '-u', default="", help="search by user")
+@click.option('--branch', '-b', default="", help="search by branch")
+@click.option('--comment', '-c', default="", help="search by comment")
+@click.option('--number', '-n', default="", help="search by PR number")
+@click.option('--keyword', '-k', default="", help="search by all parameters")
 def hub(command, args, user, comment, number, keyword, branch):
     if command == "pr":
         pr_num = int(args[0])
