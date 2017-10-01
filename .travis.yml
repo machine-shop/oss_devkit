@@ -1,0 +1,14 @@
+language: python
+python:
+    - "3.6"
+addon:
+    apt:
+        packages:
+            - flake8
+            - coveralls
+            - nose
+before_install:
+    - pip install -r requirements.txt
+script:
+    - py.test
+sudo: false
