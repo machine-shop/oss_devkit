@@ -415,12 +415,13 @@ def sync():
     open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
     for pr in open_prs:
         to_write = to_write + json_to_toml(username, repo, pr, token, "open")
-    to_write = to_write[:-2]+'\n'
+    to_write = to_write[:-1]+'\n'
     to_write = to_write + "[['closed pull requests']] \n"
     closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
     for pr in closed_prs:
         to_write = to_write + json_to_toml(username, repo, pr, token, "closed")
     # converts it to toml and stores in file
+    print(to_write)
     toml_string = toml.loads(to_write)
     toml.dump(toml_string, f)
 
