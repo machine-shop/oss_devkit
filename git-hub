@@ -276,7 +276,7 @@ def find_match(open_or_closed, list_of_dictionaries, keyword, user, comment, num
         for sub_keys in list(dictionary.keys()):
             sub_dictionary = dictionary[sub_keys]
             if keyword:         # checks keyword
-                if keyword.upper() in sub_dictionary.keys().upper() or keyword in sub_dictionary.values().upper():
+                if keyword.upper() in " ".join(sub_dictionary.keys()).upper() or keyword.upper() in " ".join(sub_dictionary.values()).upper():
                     appeared_before = True
                     if(open_or_closed):
                         all_prs[sub_dictionary['modified']] = '{0} \x1b[0;32;40m {1} \x1b[0m {2}/{3} {4}'.format(sub_keys, "O", sub_dictionary['user'], sub_dictionary['branch'], sub_dictionary['comment'])
@@ -439,10 +439,9 @@ def cli():
 @click.option('--branch', '-b', default="", help="search by branch")
 @click.option('--comment', '-c', default="", help="search by comment")
 @click.option('--number', '-n', default="", help="search by PR number")
-@click.option('--keyword', '-k', default="", help="search by all parameters")
 @click.option('--sort', '-s', default="", help="sort PRs by increasing or decreasing date")
 @click.option('--label', '-l', default="", help="search PR by label")
-def hub(command, args, user, comment, number, keyword, branch, sort, opened, label):
+def hub(command, args, user, comment, number, branch, sort, opened, label):
     if command == "pr":
         pr_num = int(args[0])
         pr(pr_num)
@@ -451,8 +450,10 @@ def hub(command, args, user, comment, number, keyword, branch, sort, opened, lab
         push()
 
     elif command == "search":
-        search(keyword, user, comment, number, branch, opened, label, sort)
-
+        if(args == None):
+            search(None, user, comment, number, branch, opened, label, sort)
+        else:
+            search(" ".join(args), user, comment, number, branch, opened, label, sort)
     elif command == "sync":
         sync()
 
