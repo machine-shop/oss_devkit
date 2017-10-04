@@ -9,6 +9,7 @@ addon:
             - nose
 before_install:
     - pip install -r requirements.txt
+    - git clone https://github.com/SeraYang1/OutsideHacks.git
 script:
     - py.test
 sudo: false
