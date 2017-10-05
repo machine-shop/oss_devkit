@@ -1,4 +1,6 @@
 language: python
+sudo: false
+dist: trusty
 python:
     - "3.6"
 addon:
@@ -9,7 +11,7 @@ addon:
             - nose
 before_install:
     - pip install -r requirements.txt
-    - git clone https://github.com/SeraYang1/OutsideHacks.git
+    - pip install pytest
 script:
-    - py.test
+    - pytest
 sudo: false
