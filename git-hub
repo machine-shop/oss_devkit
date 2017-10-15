@@ -255,7 +255,7 @@ def find_match(open_or_closed, list_of_dictionaries, keyword, user, comment, num
     ----------
     open_or_closed : boolean
         Whether looking in closed PR or open PR
-    dictionary : dictionary
+    list_of_dictionaries : dictionary
         pull-requests.toml information mapping PR number to info
     keyword : string
         Searches if any part of user, branch, comment, or number match
@@ -276,7 +276,8 @@ def find_match(open_or_closed, list_of_dictionaries, keyword, user, comment, num
         for sub_keys in list(dictionary.keys()):
             sub_dictionary = dictionary[sub_keys]
             if keyword:         # checks keyword
-                if keyword.upper() in " ".join(sub_dictionary.keys()).upper() or keyword.upper() in " ".join(sub_dictionary.values()).upper():
+                concate = " ".join(sub_dictionary.values())
+                if keyword.upper() in concate.upper():
                     appeared_before = True
                     if(open_or_closed):
                         all_prs[sub_dictionary['modified']] = '{0} \x1b[0;32;40m {1} \x1b[0m {2}/{3} {4}'.format(sub_keys, "O", sub_dictionary['user'], sub_dictionary['branch'], sub_dictionary['comment'])
@@ -421,7 +422,6 @@ def sync():
     for pr in closed_prs:
         to_write = to_write + json_to_toml(username, repo, pr, token, "closed")
     # converts it to toml and stores in file
-    print(to_write)
     toml_string = toml.loads(to_write)
     toml.dump(toml_string, f)
 
