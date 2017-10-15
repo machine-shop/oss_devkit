@@ -2,7 +2,7 @@ language: python
 sudo: false
 dist: trusty
 python:
-    - "3.6"
+    - "3.7"
 addon:
     apt:
         packages:
@@ -15,3 +15,5 @@ before_install:
 script:
     - pytest
 sudo: false
+notifications:
+  email: false
