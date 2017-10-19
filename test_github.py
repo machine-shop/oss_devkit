@@ -21,10 +21,12 @@ def gh_repo_dir():
         subprocess.run(['git', 'clone', '--depth=1', gh_repo], cwd=tmp_dir)
 
     os.chdir(repo_dir)
-    print('Syncing with GitHub...')
-    if not os.path.isfile('.git/git-hub/pull-request.toml'):
+    if not os.path.isfile('.git/git-hub/pull-requests.toml'):
+        print('Syncing with GitHub...')
         process = subprocess.Popen(["git", "hub", "sync"])
         process.communicate()
+    else:
+        print('Using cached GitHub data')
 
     return os.path.abspath(repo_dir)
 
