@@ -10,6 +10,7 @@ addon:
             - coveralls
             - nose
 before_install:
+    - export PATH=$PATH:$PWD
     - pip install -r requirements.txt
     - pip install pytest
 script:
