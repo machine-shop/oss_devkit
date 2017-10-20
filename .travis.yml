@@ -13,7 +13,7 @@ before_install:
     - pip install -r requirements.txt
     - pip install pytest
 script:
-    - pytest
+    - pytest -v -s
 sudo: false
 notifications:
   email: false
