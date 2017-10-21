@@ -2,19 +2,21 @@ language: python
 sudo: false
 dist: trusty
 python:
-    - "3.6"
+- '3.6'
 addon:
-    apt:
-        packages:
-            - flake8
-            - coveralls
-            - nose
+  apt:
+    packages:
+    - flake8
+    - coveralls
+    - nose
 before_install:
-    - export PATH=$PATH:$PWD
-    - pip install -r requirements.txt
-    - pip install pytest
+- export PATH=$PATH:$PWD
+- pip install -r requirements.txt
+- pip install pytest
 script:
-    - pytest -v -s
-sudo: false
+- pytest -v -s
 notifications:
   email: false
+env:
+  global:
+    secure: RBKKVwYjIRu14tFfKUTmUkMPWXjX9glGQjTPZFGlx06fjSDkljlKrFKWke4RBL+1+0wstosThef+QIlWqMhLxgpj0b2tr4G4f0BkB8y2kIvVjJ6yCjMgNbRLH5AuAOmtaDLrEJNujQg+F2wASZj8ydo3TCPkrhnFImGz8G8j/wR267h3rVtgU5LLLhBvQccYUqqgTIN5vjpuQZCuMT/2kSQvWFAlcgpQezjw88DT5nZbE+Eirwr4VA7FeWJvxzvUk8gq789HKxwdArzr0ACozQbAG3fRvmXws+ZqPhQfRrFoszGlF3CxSChIwPyfe+qgng+k2KkIkOVMBDHDzmmwodT35UP5Iozcx+Rh9/UkJQfj66hUNe8r1TrO1Yks4pUWA9lSBHlKckx5SdkStAD8UC7HzAHgC/0zWf5Jp8MPKZD4R4mG8qA+oRXtfz5CGQwj57sh9n7O0xS709tUK9yMxdP0LzK34MJ0AW81ofi4Kx5KxgRBLNDRd91Q40aQEuA5T01WnoY733eT20f3dMHA73IHJfna3t8D84Z4zKMpQ4+tNG6bUXwl6qZc3xgDwnpZljjDedzwutV43t4+kuj9duZSz1eL5xA5/ffeNX/xb+CUYGaXKxduBCRzVg7n16svRE3nh74kZBWnvy/456vb/cgZmq9PkXNpyscXs8SyZ4I=
