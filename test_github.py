@@ -28,6 +28,11 @@ def gh_repo_dir():
     else:
         print('Using cached GitHub data')
 
+    process = subprocess.Popen(["ls","-la"], stdout=subprocess.PIPE)
+    print(str(process.stdout.read()))
+    process = subprocess.Popen(["cd",".git"])
+    process = subprocess.Popen(["ls","-la"], stdout=subprocess.PIPE)
+    print(str(process.stdout.read()))
     return os.path.abspath(repo_dir)
 
 
