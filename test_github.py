@@ -30,9 +30,6 @@ def gh_repo_dir():
 
     process = subprocess.Popen(["ls","-la"], stdout=subprocess.PIPE)
     print(str(process.stdout.read()))
-    process = subprocess.Popen(["cd",".git"])
-    process = subprocess.Popen(["ls","-la"], stdout=subprocess.PIPE)
-    print(str(process.stdout.read()))
     return os.path.abspath(repo_dir)
 
 
