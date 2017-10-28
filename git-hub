@@ -46,12 +46,16 @@ def getToken():
         authentification
     """
     try:
-        with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
-            yaml_file = str(yaml.load(stream))
-            token = yaml_file.split("=")[1].strip()
-            return token
+        if os.path.isfile(os.path.expanduser("~/.config/git-hub.yaml")):
+            with open(os.path.expanduser("~/.config/git-hub.yaml")) as stream:
+                yaml_file = str(yaml.load(stream))
+                token = yaml_file.split("=")[1].strip()
+                return token
+        else:
+            return $GITHUB_TOKEN
 
     except (IndexError, FileNotFoundError) as e:
+        print(e)
         print(textwrap.dedent("""\
             No authentication token specified in: ~/.config/git-hub.yaml
 
