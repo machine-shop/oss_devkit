@@ -16,10 +16,6 @@ def gh_repo_dir():
     if not os.path.isdir(tmp_dir):
         os.makedirs(tmp_dir)
 
-    # with open("./.travis.yml") as f:
-    #     toYaml = yaml.safe_load(f)
-    #     print(toYaml['env']['global']['secure'])
-
     print(f'Cloning test repository {gh_repo}')
     if not os.path.isdir(repo_dir):
         subprocess.run(['git', 'clone', '--depth=1', gh_repo], cwd=tmp_dir)

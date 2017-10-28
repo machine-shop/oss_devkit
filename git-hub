@@ -399,14 +399,17 @@ def sync():
     """Updates and saves pull-requests in pull-requests.toml in the .git folder. """
     username, repo, remotes = login()
     token = getToken()
+    print("TOKEN: ", token)
 
     # saves pr into toml file
     try:
+        print("Trying to sync")
         g = github.Github(token)
         path_git = path_to_git()
         path_github = pjoin(path_git, 'git-hub')
         path_prs = pjoin(path_github, 'pull-requests.toml')
         if not os.path.isdir(path_github):
+            print("Trying to sync with git-hub")
             os.makedirs(path_github)
 
         f = open(path_prs, "w")
@@ -418,6 +421,7 @@ def sync():
 
     # creates dictionaries in toml format as we scan though pull requests
     open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
+    print("OPEN PR: ", open_prs)
     for pr in open_prs:
         to_write = to_write + json_to_toml(username, repo, pr, token, "open")
     to_write = to_write[:-1]+'\n'
