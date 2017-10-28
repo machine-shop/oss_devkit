@@ -52,7 +52,7 @@ def getToken():
                 token = yaml_file.split("=")[1].strip()
                 return token
         else:
-            return $GITHUB_TOKEN
+            return os.environ['GITHUB_TOKEN']
 
     except (IndexError, FileNotFoundError) as e:
         print(e)
