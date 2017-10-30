@@ -33,13 +33,15 @@ def gh_repo_dir():
 
 @pytest.fixture
 def gh_repo(gh_repo_dir):
-    os.chdir(gh_repo_dir+'/OutsideHacks')
+    os.chdir(gh_repo_dir)
     process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
     print(str(process.stdout.read()))
     return gh_repo_dir
 
 
 def test_sync(gh_repo):
+    process = subprocess.Popen(["git", "hub", "sync"])
+    process.communicate()
     os.chdir('.git/git-hub')
     process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
     assert "pull-requests.toml" in str(process.stdout.read())
