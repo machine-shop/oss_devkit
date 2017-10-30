@@ -23,7 +23,8 @@ def gh_repo_dir():
     os.chdir(repo_dir)
     if not os.path.isfile('.git/git-hub/pull-requests.toml'):
         print('Syncing with GitHub...')
-        process = subprocess.Popen(["git", "hub", "sync"])
+        process = subprocess.Popen(["git", "hub", "sync"], stdout=subprocess.PIPE)
+        print(str(process.stdout.read()))
         process.communicate()
         print("Success syncing!")
     else:
