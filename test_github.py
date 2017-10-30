@@ -28,15 +28,14 @@ def gh_repo_dir():
     else:
         print('Using cached GitHub data')
 
-    process = subprocess.Popen(["ls","-la"], stdout=subprocess.PIPE)
-    print(str(process.stdout.read()))
     return os.path.abspath(repo_dir)
 
 
 @pytest.fixture
 def gh_repo(gh_repo_dir):
-    print(gh_repo_dir)
-    os.chdir(gh_repo_dir)
+    os.chdir(gh_repo_dir+'/OutsideHacks')
+    process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
+    print(str(process.stdout.read()))
     return gh_repo_dir
 
 
