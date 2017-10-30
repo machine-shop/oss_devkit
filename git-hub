@@ -414,7 +414,7 @@ def sync():
         to_write = "[['open pull requests']]\n"   # later will be convereted to toml to store
     except github.BadCredentialsException as e:
         print(e)
-        print("The authentification token is not valid.")
+        click.echo("The authentification token is not valid.")
         sys.exit(1)
 
     # creates dictionaries in toml format as we scan though pull requests
