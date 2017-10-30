@@ -408,7 +408,8 @@ def sync():
         path_prs = pjoin(path_github, 'pull-requests.toml')
         if not os.path.isdir(path_github):
             os.makedirs(path_github)
-
+        print("---------")
+        print(path_prs)
         f = open(path_prs, "w")
         to_write = "[['open pull requests']]\n"   # later will be convereted to toml to store
     except github.BadCredentialsException as e:
