@@ -25,7 +25,8 @@ def gh_repo_dir():
         print('Syncing with GitHub...')
         process = subprocess.Popen(["git", "hub", "sync"], stdout=subprocess.PIPE)
         process.communicate()
-        print(str(process.stdout.read()))
+        what = str(process.stdout.read())
+        print(what)
         print("Success syncing!")
     else:
         print('Using cached GitHub data')
