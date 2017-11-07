@@ -36,7 +36,7 @@ def login():
     return (username, repo, remotes)
 
 
-def getToken():
+def get_token():
     """Will get token from authentification file
 
     Returns
@@ -85,7 +85,7 @@ def pr(num):
         The number of the pull request.
     """
     username, repo, remotes = login()
-    token = getToken()
+    token = get_token()
 
     # gets pr and runs command.
     try:
@@ -383,7 +383,8 @@ def json_to_toml(username, repo, pr, token, open_or_closed):
         to_write = to_write + 'milestone = "{0}" \n'.format(pr.milestone.title)
     else:
         to_write = to_write + 'milestone = "" \n'
-    issue_url = response.get('issue_url')
+
+    issue_url = response.get('issue_url')       #fetches labels attached to pull requests
     labels = ""
     issue_request = Request(issue_url)
     issue_response = urlopen(issue_request)
@@ -392,13 +393,32 @@ def json_to_toml(username, repo, pr, token, open_or_closed):
     for label in list(labels_dict):
         labels = labels + label.get('name')+", "
     to_write = to_write + 'labels = "{0}" \n'.format(labels[:-2])
+
+    comment_url = response.get('comments_url')       #fetches latest activity (comment) date
+    comment_count = 0
+    most_recent = ""
+    self_comment = False
+    comment_request = Request(comment_url)
+    comment_response = urlopen(comment_request)
+    comment_dict = json.loads(comment_response.read().decode('utf-8'))
+    for c in list(comment_dict):
+        comment_count = comment_count + 1
+        date = c.get('updated_at')
+        if most_recent == "" or date > most_recent:
+            most_recent = date
+        commenter = c.get('user').get('login')
+        if commenter == username:
+            self_comment = True
+    to_write = to_write + 'comment_count = "{0}" \n'.format(comment_count)
+    to_write = to_write + 'most_recent_comment = "{0}" \n'.format(most_recent)
+    to_write = to_write + 'self_comment = "{0}" \n'.format(self_comment)
     return to_write
 
 
 def sync():
     """Updates and saves pull-requests in pull-requests.toml in the .git folder. """
     username, repo, remotes = login()
-    token = getToken()
+    token = get_token()
 
     # saves pr into toml file
     try:
@@ -408,8 +428,6 @@ def sync():
         path_prs = pjoin(path_github, 'pull-requests.toml')
         if not os.path.isdir(path_github):
             os.makedirs(path_github)
-        print("---------")
-        click.echo(path_prs)
         f = open(path_prs, "w")
         to_write = "[['open pull requests']]\n"   # later will be convereted to toml to store
     except github.BadCredentialsException as e:
