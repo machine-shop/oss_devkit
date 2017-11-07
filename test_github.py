@@ -1,3 +1,5 @@
+def test_sync():
+	return True
 # import pytest
 # import tempfile
 # import shutil
