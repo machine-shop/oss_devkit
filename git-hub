@@ -227,8 +227,18 @@ def get_info(pr_num):
         labels = "None"
         if(pr_dictionary['labels'] is not ""):
             labels = pr_dictionary['labels']
+
+        comment_count = "None"
+        if(pr_dictionary['comment_count'] is not ""):
+            comment_count = pr_dictionary['comment_count']
+        most_recent_comment = "None"
+        if(pr_dictionary['most_recent_comment'] is not ""):
+            most_recent_comment = pr_dictionary['most_recent_comment']
+        self_comment = "None"
+        if(pr_dictionary['self_comment'] is not ""):
+            self_comment = pr_dictionary['self_comment']
         click.echo('{0} \x1b[0;32;40m {1} \x1b[0m {2}/{3} {4}'.format(key, open_PR, pr_dictionary['user'], pr_dictionary['branch'], pr_dictionary['comment']))
-        click.echo('-Labels: {0}  -Reviewers: {1}  -Assignees: {2}  -Milestones: {3}'.format(labels, reviewers, assignee, milestone))
+        click.echo('-Labels: {0}  -Reviewers: {1}  -Assignees: {2}  -Milestones: {3} -Comment count: {4} -Most recent comment: {5} -Self comment: {6}'.format(labels, reviewers, assignee, milestone, comment_count, most_recent_comment, self_comment))
 
 
 def print_in_order(sort, dict):
