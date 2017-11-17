@@ -1,0 +1,25 @@
+language: python
+sudo: false
+dist: trusty
+python:
+- '3.6'
+addon:
+  apt:
+    packages:
+    - flake8
+    - coveralls
+    - nose
+before_install:
+- export PATH=$PATH:$PWD
+- pip install -r requirements.txt
+- pip install pytest
+script:
+- pytest -v -s
+notifications:
+  email: false
+after_success:
+  - bash deploy_docs.sh
+env:
+  global:
+  - GH_REF: machine-shop.github.io/oss-devkit
+  - secure: oZYymX/Bgm4CRHnwqKCgqCH0oZRNf2zOeRaYTpjC8BDH2x0D17lFLJKwHoSCVcWqvI9cN96K/MdYVWp5g8GgkmWYRJnPtncDK5y6tD85T2pM5NW97AnDMzEMWCel9mHQIlGAQwkLkZt0cdfrWMiWvw19hgoWmCdaRRCyrmNZDbCQdTRsxwB77Qi9dx7AXZ0wF8mY7hTfAoXNF77Y1vCGD/vtoeGAhgc5bcUIigJmWJNjS94bZmx6RSf4u9kCxitKrIqSuo9dbfGC4DYxrzldLeRlBeAtwvvaCN0tQrBwfjPQmXvTGF1VgSc5m0Y15govS6QS4IQ8ptZJPru3vuuYMvRWIFgIEgtj6iPXTFGNFRw/sUtj8216zQ4O3K+C95fTcjEr1Yed4VhoWgYEYwKtdyNyZsJ2B4xI5VBefihtMP3YE31fDOnP3yK937SeNCp8BQG9SzCmwWqepc5NiJ4LdCdNK9/7dVkUzRQPMjw2bAvr8DUR8/fS8TcPfii8kG6ITxA3S5dcgvkQ/VkfH3vCRkotSBxs1XnByCURGbkDzogX4Odpou0nBuWGRp9ZWX2j27+psfkBJVuUP8EjO9zs9BPo4cyacmXQB+LThjK4GlbP41FgFBB9RBlslNrXwDrB/WJkUA+kj8/+4x2q5dyY7GRXquik+okBFAJzGz0l230=
