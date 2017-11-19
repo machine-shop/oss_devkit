@@ -367,10 +367,17 @@ def json_to_toml(username, repo, pr, token, open_or_closed):
     response = urlopen(request)
     response = json.loads(response.read().decode('utf-8'))
     to_write = to_write + "['{0} pull requests'.{1}]\n".format(open_or_closed, pr.number)
+    to_write = to_write + 'title = "{0}" \n'.format(response.get('title'))
+    to_write = to_write + 'body = "{0}" \n'.format(response.get('body'))
     to_write = to_write + 'user = "{0}" \n'.format(pr.user.name)
     to_write = to_write + 'branch = "{0}" \n'.format(response.get('head').get('ref'))
     to_write = to_write + 'comment = "{0}" \n'.format(pr.title)
+    to_write = to_write + 'commits = "{0}" \n'.format(response.get('commits'))
     to_write = to_write + 'modified = "{0}" \n'.format(pr.updated_at)
+    to_write = to_write + 'created_at = "{0}" \n'.format(response.get('created_at'))
+    to_write = to_write + 'updated_at = "{0}" \n'.format(response.get('updated_at'))
+    to_write = to_write + 'closed_at = "{0}" \n'.format(response.get('closed_at'))
+    to_write = to_write + 'merged_at = "{0}" \n'.format(response.get('merged_at'))
     reviewers = ""
     for reviewer in list(response.get('requested_reviewers')):
         reviewers = reviewers + reviewer.get('login')+", "
