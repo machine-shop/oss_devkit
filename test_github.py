@@ -36,20 +36,6 @@ def gh_repo(gh_repo_dir):
     return gh_repo_dir
 
 
-def test_sync(gh_repo):
-    os.chdir('.git/git-hub')
-    process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
-    assert "pull-requests.toml" in str(process.stdout.read())
-    process = subprocess.Popen(["rm","pull-requests.toml"])
-    process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
-    assert "pull-requests.toml" not in str(process.stdout.read())
-    os.chdir('./../../Server')
-    process = subprocess.Popen(["git", "hub", "sync"])
-    process.communicate()
-    os.chdir('./../.git/git-hub')
-    process = subprocess.Popen(["ls"], stdout=subprocess.PIPE)
-    assert "pull-requests.toml" in str(process.stdout.read())
-
 def test_get_info_working(gh_repo):
     process = subprocess.Popen(["git", "hub", "info", "3"], stdout=subprocess.PIPE)
     assert 'Sera Yang/test adding spaces\\n-Labels: invalid  -Reviewers: None  -Assignees: None  -Milestones: None' in str(process.stdout.read())
