@@ -172,6 +172,7 @@ def path_to_toml():
     path_git = path_to_git()
     path_github = pjoin(path_git, 'git-hub')
     path_prs = pjoin(path_github, 'pull-requests.toml')
+    return path_prs
 
 def find_in_dictionary(pr_data, open_or_closed_dictionary):
     """Fetches all the information on a certain PR
@@ -231,10 +232,48 @@ def get_info(pr_data):
         labels = "None"
         if(pr_dictionary['labels'] is not ""):
             labels = pr_dictionary['labels']
+        branch = "None"
+        if(pr_dictionary['branch'] is not ""):
+            branch = pr_dictionary['branch']
+        commits = "None"
+        if(pr_dictionary['commits'] is not ""):
+            commits = pr_dictionary['commits']
+        most_recent_comment = "None"
+        if(pr_dictionary['most_recent_comment'] is not ""):
+            most_recent_comment = parse_time(pr_dictionary['most_recent_comment'])
+        comment_count = "None"
+        if(pr_dictionary['comment_count'] is not ""):
+            comment_count = pr_dictionary['comment_count']
+        created_at = "None"
+        if(pr_dictionary['created_at'] is not ""):
+            created_at = parse_time(pr_dictionary['created_at'])
+        updated_at = "None"
+        if(pr_dictionary['updated_at'] is not ""):
+            updated_at = parse_time(pr_dictionary['updated_at'])
         GREEN = '\x1b[0;32;40m'
         CLOSE = '\x1b[0m'
         click.echo('{0} {1} {2} {3} {4}/{5} {6}'.format(key, GREEN, open_PR, CLOSE, pr_dictionary['user'], pr_dictionary['branch'], pr_dictionary['comment']))
-        click.echo('-Labels: {0}  -Reviewers: {1}  -Assignees: {2}  -Milestones: {3}'.format(labels, reviewers, assignee, milestone))
+        click.echo('-Created at: {0}  -Updated at: {1}'.format(created_at, updated_at))
+        click.echo('-Commits: {0}  -Comment count: {1}  -Most recent comment: {2}'.format(commits, comment_count, most_recent_comment))
+        click.echo('-Labels: {0}  -Reviewers: {1}  -Branch: {2}  -Assignees: {3}  -Milestones: {4}'.format(labels, reviewers, branch, assignee, milestone))
+
+def parse_time(time):
+    """
+    Converts time into easily legible syntax
+
+    Parameters
+    ----------
+    Time : String
+        Time that git-hub gives
+    """
+    date = time.split('T')[0]
+    hours = time.split('T')[1]
+    hour = hours.split(':', 1)[0]
+    am_or_pm = "AM"
+    if int(hour) > 12:
+        hour = int(hour) % 12
+        am_or_pm = "PM"
+    return date+" "+str(hour)+":"+hours.split(':',1)[1][:-1]+am_or_pm
 
 
 def print_in_order(dict, increasing=False):
@@ -443,6 +482,8 @@ def sync():
     # saves pr into toml file
     try:
         g = github.Github(token)
+        path_git = path_to_git()
+        path_github = pjoin(path_git, 'git-hub')
         path_prs = path_to_toml()
         if not os.path.isdir(path_github):
             os.makedirs(path_github)
