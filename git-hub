@@ -231,11 +231,50 @@ def get_info(pr_data):
         labels = "None"
         if(pr_dictionary['labels'] is not ""):
             labels = pr_dictionary['labels']
+        branch = "None"
+        if(pr_dictionary['branch'] is not ""):
+            branch = pr_dictionary['branch']
+        commits = "None"
+        if(pr_dictionary['commits'] is not ""):
+            commits = pr_dictionary['commits']
+        most_recent_comment = "None"
+        if(pr_dictionary['most_recent_comment'] is not ""):
+            most_recent_comment = parse_time(pr_dictionary['most_recent_comment'])
+        comment_count = "None"
+        if(pr_dictionary['comment_count'] is not ""):
+            comment_count = pr_dictionary['comment_count']
+        created_at = "None"
+        if(pr_dictionary['created_at'] is not ""):
+            created_at = parse_time(pr_dictionary['created_at'])
+        updated_at = "None"
+        if(pr_dictionary['updated_at'] is not ""):
+            updated_at = parse_time(pr_dictionary['updated_at'])
         GREEN = '\x1b[0;32;40m'
         CLOSE = '\x1b[0m'
         click.echo('{0} {1} {2} {3} {4}/{5} {6}'.format(key, GREEN, open_PR, CLOSE, pr_dictionary['user'], pr_dictionary['branch'], pr_dictionary['comment']))
-        click.echo('-Labels: {0}  -Reviewers: {1}  -Assignees: {2}  -Milestones: {3}'.format(labels, reviewers, assignee, milestone))
+        click.echo('-Created at: {0}  -Updated at: {1}'.format(created_at, updated_at))
+        click.echo('-Commits: {0}  -Comment count: {1}  -Most recent comment: {2}'.format(commits, comment_count, most_recent_comment))
+        click.echo('-Labels: {0}  -Reviewers: {1}  -Branch: {2}  -Assignees: {3}  -Milestones: {4}'.format(labels, reviewers, branch, assignee, milestone))
 
+def parse_time(time):
+    """
+    Converts time into python datetime object
+
+    Parameters
+    ----------
+    Time : String
+        Time that git-hub gives
+    """
+    date = time.split('T')[0]
+    time = time.split('T')[1][:-1]
+    year, date = date.split('-', 1)
+    month, date = date.split('-', 1)
+    day = date
+    hour, time = time.split(':',1)
+    minute, time = time.split(':',1)
+    second = time
+    d = datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+    return d
 
 def print_in_order(dict, increasing=False):
     """
