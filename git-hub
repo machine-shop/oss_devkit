@@ -8,6 +8,7 @@ import textwrap
 import json
 import toml
 import os
+from datetime import datetime
 from urllib.request import urlopen, Request
 
 from os.path import join as pjoin
@@ -172,6 +173,7 @@ def path_to_toml():
     path_git = path_to_git()
     path_github = pjoin(path_git, 'git-hub')
     path_prs = pjoin(path_github, 'pull-requests.toml')
+    return path_prs
 
 def find_in_dictionary(pr_data, open_or_closed_dictionary):
     """Fetches all the information on a certain PR
@@ -482,7 +484,9 @@ def sync():
     # saves pr into toml file
     try:
         g = github.Github(token)
-        path_prs = path_to_toml()
+        path_git = path_to_git()
+        path_github = pjoin(path_git, 'git-hub')
+        path_prs = pjoin(path_github, 'pull-requests.toml')
         if not os.path.isdir(path_github):
             os.makedirs(path_github)
         f = open(path_prs, "w")
