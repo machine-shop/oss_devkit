@@ -114,7 +114,7 @@ def execute():
         dt = epoch + timedelta(seconds=value)
         return dt.strftime('%Y/%m')
 
-    
+
     for r in releases:
         releases[r] = dateutil.parser.parse(releases[r])
 
@@ -178,6 +178,6 @@ def execute():
     ax2.set_ylabel('Total PRs', color='black')
 
     plt.tight_layout()
-    fig.savefig('.git/git-hub/PRs.jpg')
+    fig.savefig('.git/git-hub/PRs.png')
 
-    #plt.show()
+    # plt.show()

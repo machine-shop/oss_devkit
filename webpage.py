@@ -175,8 +175,6 @@ def no_discussion_helper(prs):
     for pr_num in list(prs.keys()):
         pr = prs[pr_num]
         if pr['comment_count'] == "0":
-            print("this pr")
-            print(pr['comment_count'])
             no_disc_prs.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
     return no_disc_prs
 
