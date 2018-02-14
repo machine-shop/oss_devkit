@@ -1,8 +1,0 @@
-pygithub
-pyyaml
-click
-toml
-requests
-Flask
-re
-jinja2
