@@ -70,6 +70,22 @@
         {% endfor %}
       </ul>
     </div>
+    <div class="container">
+        <h3 id="center-header"> List of most popular PRs: </h3>
+      <ul>
+        {% for n in popular_tickets %}
+        <li>{{n}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="container">
+        <h3 id="center-header"> List of oldest unmerged PRs: </h3>
+      <ul>
+        {% for n in closed_pr_refer_tickets %}
+        <li>{{n}}</li>
+        {% endfor %}
+      </ul>
+    </div>
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
   </body>
