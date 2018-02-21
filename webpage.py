@@ -36,14 +36,15 @@ def week_old_comments():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    opened = week_old_comments_helper(open_dict)
-    return opened
+    opened, url = week_old_comments_helper(open_dict)
+    return opened, url
 
 
 def week_old_comments_helper(prs):
     """Helper function that finds all PRs in a dictionary that are over a week old
     """
     all_prs = []
+    url = []
     for num in list(prs.keys()):
         pr = prs[num]
         if(pr['most_recent_comment'] == ""):
@@ -52,7 +53,8 @@ def week_old_comments_helper(prs):
             comment_time = parse_time(pr['most_recent_comment'])
             if((datetime.now() - comment_time).days > 7):
                 all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
-    return all_prs
+                url.append(pr["url"])
+    return all_prs, url
 
 
 def parse_time(time):
@@ -85,13 +87,14 @@ def oldest_prs():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    oldest = oldest_prs_helper(open_dict)
-    return oldest
+    oldest, url = oldest_prs_helper(open_dict)
+    return oldest, url
 
 
 def oldest_prs_helper(prs):
     """Helper function that finds oldest prs"""
     oldest = []
+    url = []
     q = PriorityQueue(maxsize=3)
     old = timedelta()
     now = datetime.now()
@@ -109,7 +112,8 @@ def oldest_prs_helper(prs):
         if now-parse_time(pr['created_at']) > old:
             days = str(now-parse_time(pr['created_at']))[:8]
             oldest.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]} --  {days}')
-    return oldest
+            url.append(pr["url"])
+    return oldest, url
 
 
 def most_active_prs():
@@ -121,13 +125,14 @@ def most_active_prs():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    most_popular = most_active_prs_helper(open_dict)
-    return most_popular
+    most_popular, url = most_active_prs_helper(open_dict)
+    return most_popular, url
 
 
 def most_active_prs_helper(prs):
     """helper function to find pull requests."""
     popular = []
+    url = []
     q = PriorityQueue()
     for pr_num in list(prs.keys()):
         pr = prs[pr_num]
@@ -145,7 +150,8 @@ def most_active_prs_helper(prs):
         recent_comment_count = recent_comments(pr)
         if recent_comment_count in most_comments:
             popular.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]} -- {recent_comment_count} comment(s)')
-    return popular
+            url.append(pr["url"])
+    return popular, url
 
 
 def recent_comments(pr):
@@ -168,18 +174,20 @@ def no_discussion():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    opened = no_discussion_helper(open_dict)
-    return opened
+    opened, url = no_discussion_helper(open_dict)
+    return opened, url
 
 
 def no_discussion_helper(prs):
     """helper function to find pull requests."""
     no_disc_prs = []
+    url = []
     for pr_num in list(prs.keys()):
         pr = prs[pr_num]
         if pr['comment_count'] == "0":
             no_disc_prs.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
-    return no_disc_prs
+            url.append(pr["url"])
+    return no_disc_prs, url
 
 
 def prs_with_me():
@@ -191,18 +199,20 @@ def prs_with_me():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    opened = find_prs_with_me(open_dict)
-    return opened
+    opened, url = find_prs_with_me(open_dict)
+    return opened, url
 
 
 def find_prs_with_me(prs):
     """helper function to find pull requests."""
     prs_with_me = []
+    url = []
     for pr_num in list(prs.keys()):
         pr = prs[pr_num]
         if pr['self_comment'] == "True":
             prs_with_me.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
-    return prs_with_me
+            url.append(pr["url"])
+    return prs_with_me, url
 
 
 def unmergeable_prs():
@@ -214,18 +224,20 @@ def unmergeable_prs():
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     open_dict = pr_dict['open pull requests']
-    opened = find_unmergeable_prs(open_dict)
-    return opened
+    opened, url = find_unmergeable_prs(open_dict)
+    return opened, url
 
 
 def find_unmergeable_prs(prs):
     """helper function to find pull requests."""
     unmergeable_prs = []
+    url = []
     for pr_num in list(prs.keys()):
         pr = prs[pr_num]
         if pr['mergeable'] == "False":
             unmergeable_prs.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
-    return unmergeable_prs
+            url.append(pr["url"])
+    return unmergeable_prs, url
 
 
 def issues_no_comments():
@@ -236,20 +248,23 @@ def issues_no_comments():
         pr_dict = toml.load(f)
     except (OSError, IOError) as e:
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
+    if 'issues' not in pr_dict:
+        return None, None
     open_dict = pr_dict['issues']
-    opened = find_issues_no_comments(open_dict)
-    return opened
+    opened, url = find_issues_no_comments(open_dict)
+    return opened, url
 
 
 def find_issues_no_comments(issues):
     """helper function to find issues with no comments."""
     issues_no_comments = []
+    url = []
     for num in list(issues.keys()):
         issue = issues[num]
         if issue['comment_count'] == "0":
-            print(issue['comment_count'])
             issues_no_comments.append(f'issue #{num}: {issue["title"]}')
-    return issues_no_comments
+            url.append(issues["url"])
+    return issues_no_comments, url
 
 
 def tickets_referred(comments):
@@ -271,24 +286,27 @@ def closed_pr_refer_ticket():
         f = open(path_prs, "r")
         pr_dict = toml.load(f)
     except (OSError, IOError) as e:
-
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     closed = pr_dict['closed pull requests']
+    if 'issues' not in pr_dict:
+        return None, None
     issues = pr_dict['issues']
-    issues_referred = find_closed_pr_refer_ticket(closed, issues)
-    return issues_referred
+    issues_referred, urls = find_closed_pr_refer_ticket(closed, issues)
+    return issues_referred, urls
 
 
 def find_closed_pr_refer_ticket(closed_prs, issues):
     """helper function to find closed prs that reference open issues"""
     unresolved_issues = []
+    urls = []
     for num in closed_prs:
         pr = closed_prs[num]
         referred_tickets = tickets_referred(pr['comment_content'])
         for ticket in referred_tickets:
             if ticket in issues:
                 unresolved_issues.append(f'issue #{ticket}: {issues[ticket]["title"]}')
-    return unresolved_issues
+                urls.append(issues[ticket]["url"])
+    return unresolved_issues, urls
 
 
 def popular_tickets():
@@ -301,9 +319,11 @@ def popular_tickets():
 
         print("ERROR: pull-requests.toml doesn't exist. Run 'git hub sync' and try again")
     opened = pr_dict['open pull requests']
+    if 'issues' not in pr_dict:
+        return None, None
     issues = pr_dict['issues']
-    popular = find_popular_tickets(opened, issues)
-    return popular
+    popular, urls = find_popular_tickets(opened, issues)
+    return popular, urls
 
 
 def find_popular_tickets(opened, issues):
@@ -334,7 +354,9 @@ def find_popular_tickets(opened, issues):
         popular_count.add(-q.get())
         count += 1
     most_popular = []
+    urls = []
     for ticket in list(tickets.keys()):
         if tickets[ticket] in popular_count:
             most_popular.append(f'issue #{ticket}: {issues[ticket]["title"]}')
-    return most_popular
+            urls.append(issues[ticket]["url"])
+    return most_popular, urls
