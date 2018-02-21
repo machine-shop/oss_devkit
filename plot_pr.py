@@ -145,9 +145,9 @@ def execute():
         print("no pull requests!")
         return
 
-    first_pr = dates[dates_f.index(min(dates_f))]
-    start_date = datetime(2016, 5, 1, tzinfo=dates[0].tzinfo)
-    start_month = diff_month(first_pr, start_date)-1    #first month on graph
+    first_pr = dates[dates.index(min(dates))]   #time of first pr
+    start_date = datetime(2016, 5, 1, tzinfo=dates[0].tzinfo)   #Not sure why, but seems like graph tick marks start at 5/1/2016
+    start_month = diff_month(first_pr, start_date)-1    #difference between first pr and 5/1/2016
 
     # Fixed point in time
     epoch = datetime(209, 1, 1, tzinfo=dates[0].tzinfo)

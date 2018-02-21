@@ -427,7 +427,7 @@ def json_to_toml(username, repo, pr, token, open_or_closed):
     to_write = to_write + "['{0} pull requests'.{1}]\n".format(open_or_closed, pr.number)
     to_write = to_write + 'url = "{0}" \n'.format(response.get('html_url'))
     to_write = to_write + 'title = "{0}" \n'.format(response.get('title'))
-    to_write = to_write + 'body = "{0}" \n'.format(response.get('body'))
+    to_write = to_write + 'body = "{0}" \n'.format(response.get('body').replace("\n", ""))
     to_write = to_write + 'user = "{0}" \n'.format(pr.user.login)
     to_write = to_write + 'branch = "{0}" \n'.format(response.get('head').get('ref'))
     to_write = to_write + 'mergeable = "{0}" \n'.format(pr.mergeable)
