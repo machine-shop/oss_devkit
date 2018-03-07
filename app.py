@@ -1,5 +1,4 @@
 import jinja2
-import webpage
 import os
 import toml
 import re
@@ -49,10 +48,10 @@ def week_old_comments_helper(prs):
     url = []
     for num in list(prs.keys()):
         pr = prs[num]
-        if(pr['most_recent_comment'] == ""):
+        if(pr['most_recent'] == ""):
             all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
         else:
-            comment_time = parse_time(pr['most_recent_comment'])
+            comment_time = parse_time(pr['most_recent'])
             if((datetime.now() - comment_time).days > 7):
                 all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
                 url.append(pr["url"])
