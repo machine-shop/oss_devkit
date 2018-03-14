@@ -178,9 +178,9 @@ def find_in_dictionary(pr_id, pr_data):
     pr_data : dictionary
         dictionary of open or closed PRs to find pr_id in
     """
-    if(pr_data is not None):
+    if (pr_data is not None):
         for pr_nr in pr_data:
-            if(pr_nr == str(pr_id)):
+            if (pr_nr == str(pr_id)):
                 return pr_nr, pr_data[pr_nr]
     return None, None
 
@@ -206,10 +206,10 @@ def get_info(pr_data):
 
     open_PR = "O"
     key, pr_dictionary = find_in_dictionary(pr_data, open_dict)
-    if(pr_dictionary is None):
+    if (pr_dictionary is None):
         open_PR = "C"
         key, pr_dictionary = find_in_dictionary(pr_data, closed_dict)
-    if(pr_dictionary is None):
+    if (pr_dictionary is None):
         click.echo(f"Could not find PR #{pr_data}."
                    "Run 'git hub sync' and try again.")
     else:
@@ -267,7 +267,7 @@ def print_in_order(dict, increasing=False):
     inreasing : boolean
         tells if the user wants dates in order of most recent first
     """
-    if(increasing):
+    if (increasing):
         sorted_list = sorted(dict)
         for x in sorted_list:
             click.echo(f"{dict[x]} : {x[:10]}")
@@ -326,7 +326,7 @@ def find_match(open_or_closed, list_of_dictionaries,
                         concate_upper += item.upper()
             if keyword.upper() in concate_upper:
                 appeared_before = True
-                if(open_or_closed):
+                if (open_or_closed):
                     all_prs[dictionary['modified']] = (
                         f'{dictionary_key} '
                         f'{ansi.GREEN} "O" {ansi.CLOSE}'
@@ -353,7 +353,7 @@ def find_match(open_or_closed, list_of_dictionaries,
                     in temp_user.upper() and branch.upper()
                     in temp_branch.upper()):
                 appeared_before = True
-                if(open_or_closed):
+                if (open_or_closed):
                     all_prs[dictionary['modified']] = (
                         f'{dictionary_key} {ansi.GREEN} "O"'
                         f'{ansi.CLOSE} {dictionary["user"]}/'
@@ -400,11 +400,11 @@ def search(keyword, user, comment, number,
 
     open_dict = pr_dict['open pull requests']
     closed_dict = pr_dict['closed pull requests']
-    if(not opened_or_closed or opened_or_closed.lower() == 'open'):
+    if (not opened_or_closed or opened_or_closed.lower() == 'open'):
         open_prs, q = find_match(True, open_dict, keyword,
                                  user, comment, number, branch, label)
         print_in_order(q, sort.startswith('i'))
-    if(not opened_or_closed or opened_or_closed.lower() == 'closed'):
+    if (not opened_or_closed or opened_or_closed.lower() == 'closed'):
         closed_prs, q = find_match(False, closed_dict, keyword,
                                    user, comment, number, branch, label)
         print_in_order(q, sort.startswith('i'))
@@ -576,7 +576,8 @@ def render():
     try:
         plot_pr.execute()
     except ImportError:
-        print("Matplotlib not installed, cannot render image. Continuing without image.")
+        print(f"""Matplotlib not installed, cannot render image. Continuing without
+         image.""")
     app.main()
 
 
@@ -606,7 +607,7 @@ def hub(command, args, user, comment, number, branch, sort, opened, label):
         push()
 
     elif command == "search":
-        if(not args):
+        if (not args):
             search(None, user, comment, number, branch, opened, label, sort)
         else:
             search(" ".join(args), user, comment,
