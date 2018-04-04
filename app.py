@@ -50,6 +50,7 @@ def week_old_comments_helper(prs):
         pr = prs[num]
         if(pr['most_recent'] == ""):
             all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
+            url.append(pr["url"])
         else:
             comment_time = parse_time(pr['most_recent'])
             if((datetime.now() - comment_time).days > 7):
