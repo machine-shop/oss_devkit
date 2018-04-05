@@ -528,17 +528,51 @@ def find_issue_info(username, repo, issue, token):
     return textwrap.dedent(to_write)
 
 
-def clone(user_repo):
-    """Clones user's repo without needing to input the URL.
+def new_pr(branch, repo_other, user_other, branch_other):
+    """Creates the url for a new pull request from given branch to the master
+       branch. Does not fill in any information for the userself.
 
        Parameters
        ----------
-       user_repo : string
-           user/repo to be cloned from
+       branch : string
+           branch user is trying to merge from
+       repo_other : string
+           repo that user wants to merge on to
+       user_other : string
+           owner of repo that we want to merge on to
+       branch_other : string
+           branch of repo that we want to merge on to
     """
-    user, repo = user_repo.split('/')
-    p = subprocess.Popen(["git", "clone", f'https://github.com/{user}/{repo}'])
-    p.communicate()
+    username, repo, remotes = login()
+    token = get_token()
+    if branch == "":
+        p = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                           stdout=subprocess.PIPE)
+        branch = str(p.stdout.decode("utf-8").strip('\n'))
+    p = subprocess.Popen(["git", "branch", "-r"], stdout=subprocess.PIPE)
+    branches = p.stdout.read().decode('UTF-8').split('\n')[:-1]
+    branches = [br.split("/")[1] for br in branches]
+    if branch not in branches:
+        print(f'Branch {branch} is not a remote branch. Please check branches '
+              'with "git branch -r"  and try again.')
+        return
+    if repo_other and not user_other:
+        print('Need to enter the username the repo belongs to.')
+    if not repo_other and user_other:
+        print("Need to enter the user's repo.")
+    if repo_other and user_other:
+        if branch_other:
+            print(f'https://github.com/{user_other}/{repo_other}/compare/'
+                  f'{branch_other}...{username}:{branch}')
+        else:
+            print(f'https://github.com/{user_other}/{repo_other}/compare/'
+                  f'master...{username}:{branch}')
+        return
+    if branch_other:
+        print(f'https://github.com/{username}/{repo}/compare/{branch_other}...'
+              f'{branch}')
+    else:
+        print(f'https://github.com/{username}/{repo}/compare/master...{branch}')
 
 
 def sync():
@@ -636,11 +670,8 @@ def hub(command, args, user, comment, number, branch, sort, open, label, repo):
     elif command == "render":
         render()
 
-    elif command == "clone":
-        if len(args) > 1:
-            print("Please enter information as 'git hub clone {user}/{repo}'")
-        else:
-            clone(str(args[0]))
+    elif command == "new":
+        new_pr(str(args[0]), repo, user, branch)
 
     else:
         print("invalid command")
