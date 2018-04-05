@@ -637,7 +637,10 @@ def hub(command, args, user, comment, number, branch, sort, open, label, repo):
         render()
 
     elif command == "clone":
-        clone(str(args[0]))
+        if len(args) > 1:
+            print("Please enter information as 'git hub clone {user}/{repo}'")
+        else:
+            clone(str(args[0]))
 
     else:
         print("invalid command")
