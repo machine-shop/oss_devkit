@@ -101,7 +101,7 @@ def pr(num):
         remote_name = "\\n" + other_user + "\\t"
         if remote_name not in remotes:
             p = subprocess.Popen(["git", "remote", "add", other_user,
-                                  f'git@github.com:{other_user}/{repo}'])
+                                 f'git@github.com:{other_user}/{repo}'])
             p.communicate()
         p = subprocess.Popen(["git", "fetch", other_user],
                              stdout=subprocess.PIPE)
@@ -549,7 +549,7 @@ def fetch_forks(lst_remotes):
         for remote in lst_remotes:
             if remote not in curr_remotes:
                 p = subprocess.Popen(["git", "remote", "add", remote,
-                                          f'git@github.com:{remote}/{repo}'])
+                                     f'git@github.com:{remote}/{repo}'])
 
         cmd = ["git", "fetch", "--multiple"]
         for remote in lst_remotes:
@@ -567,77 +567,6 @@ def fetch_forks(lst_remotes):
         print(f'There is no pr with number {num}.')
         sys.exit(1)
 
-
-def clone(user_repo):
-    """Clones user's repo without needing to input the URL.
-
-       Parameters
-       ----------
-       user : string
-           user to be cloned from
-       repo : string
-           repository to clone
-    """
-    user, repo = user_repo.split('/')
-    p = subprocess.Popen(["git", "clone", f'https://github.com/{user}/{repo}'])
-    p.communicate()
-
-
-def new_pr(branch, repo_other, user_other, branch_other):
-    """Creates the url for a new pull request from given branch to the master
-       branch. Does not fill in any information for the userself.
-
-       Parameters
-       ----------
-       branch : string
-           branch user is trying to merge from
-    """
-    username, repo, remotes = login()
-    token = get_token()
-    if branch == "":
-        p = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE)
-        branch = str(p.stdout.decode("utf-8").strip('\n'))
-    p = subprocess.Popen(["git", "branch", "-r"], stdout=subprocess.PIPE)
-    branches = p.stdout.read().decode('UTF-8').split('\n')[1:-1]
-    branches = [br.split("origin/")[1] for br in branches]
-    if branch not in branches:
-        print(f'Branch {branch} is not a remote branch. Please check branches '
-                'with "git branch -r"  and try again.')
-        return
-    if repo_other and not user_other:
-        print('Need to enter the username the repo belongs to.')
-    if not repo_other and user_other:
-        print("Need to enter the user's repo.")
-    if repo_other and user_other:
-        if branch_other:
-            print(f'https://github.com/{user_other}/{repo_other}/compare/'
-                                    f'{branch_other}...{username}:{branch}')
-        else:
-            print(f'https://github.com/{user_other}/{repo_other}/compare/'
-                                    f'master...{username}:{branch}')
-        return
-    if branch_other:
-        print(f'https://github.com/{username}/{repo}/compare/{branch_other}...'
-                                    f'{branch}')
-    else:
-        print(f'https://github.com/{username}/{repo}/compare/master...{branch}')
-
-
-def checkout(url):
-    num = url.split("/")[-1]
-    p = subprocess.run(["git", "branch"], stdout=subprocess.PIPE)
-    remotes = str(p.stdout.decode("utf-8").strip('\n'))
-    if "PR_{num}" not in remotes:
-        p = subprocess.run(["git", "fetch", "origin", f'refs/pull/{num}/head:PR_{num}'])
-        p = subprocess.run(["git", "branch", "-u", "{url}/PR_{num}", "PR_{num}"])
-    else:
-        p = subprocess.run(["git", "checkout", f'PR_{num}'])
-        p = subprocess.run(["git", "pull"])
-
-
-def list_pr_url():
-    username, repo, remotes = login()
-    click.echo("https://github.com/{username}/{repo}/pulls")
 
 def sync():
     """Updates and saves pull-requests
@@ -700,7 +629,7 @@ def cli():
 @cli.command()
 @click.argument("command", default="")
 @click.argument("args", nargs=-1)
-@click.option('--opened', '-o', default="",
+@click.option('--open', '-o', default="",
               help="search by open or closed PRs")
 @click.option('--user', '-u', default="", help="search by user")
 @click.option('--branch', '-b', default="", help="search by branch")
@@ -710,7 +639,7 @@ def cli():
               help="sort PRs by increasing or decreasing date")
 @click.option('--label', '-l', default="", help="search PR by label")
 @click.option('--repo', '-r', default="", help="push to given repo")
-def hub(command, args, user, comment, number, branch, sort, opened, label, repo):
+def hub(command, args, user, comment, number, branch, sort, open, label, repo):
     if command == "pr":
         pr_num = int(args[0])
         pr(pr_num)
@@ -736,20 +665,6 @@ def hub(command, args, user, comment, number, branch, sort, opened, label, repo)
 
     elif command == "fetch":
         fetch_forks(args)
-
-    elif command == "clone":
-        clone(str(args[0]))
-    elif command == "new":
-        if args:
-            new_pr(str(args[0]), user, repo, branch)
-        else:
-            new_pr( "", user, repo, branch)
-
-    elif command == "checkout":
-        checkout(args[0])
-
-    elif command == "list":
-        list_pr_url()
 
     else:
         print("invalid command")
