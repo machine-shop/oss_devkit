@@ -528,44 +528,9 @@ def find_issue_info(username, repo, issue, token):
     return textwrap.dedent(to_write)
 
 
-def fetch_forks(lst_remotes):
-    """Adds all the listed forks as remotes, where each username is the remote
-       name.
-
-       Parameters
-       ----------
-       list_remotes : array
-           list of all fork usernames
-    """
+def list_pr_url():
     username, repo, remotes = login()
-    token = get_token()
-    try:
-        g = github.Github(token)
-
-        curr_remotes = []
-        p = subprocess.Popen(["git", "remote"], stdout=subprocess.PIPE)
-        # p.communicate()
-        curr_remotes = p.stdout.read().decode('UTF-8').split('\n')
-        for remote in lst_remotes:
-            if remote not in curr_remotes:
-                p = subprocess.Popen(["git", "remote", "add", remote,
-                                     f'git@github.com:{remote}/{repo}'])
-
-        cmd = ["git", "fetch", "--multiple"]
-        for remote in lst_remotes:
-            cmd.append(remote)
-        p = subprocess.Popen(cmd)
-        p.communicate()
-
-    except github.BadCredentialsException as e:
-        print(e)
-        print("The authentification token is not valid.")
-        sys.exit(1)
-
-    except github.UnknownObjectException as e:
-        print(e)
-        print(f'There is no pr with number {num}.')
-        sys.exit(1)
+    click.echo("https://github.com/{username}/{repo}/pulls")
 
 
 def sync():
@@ -663,8 +628,8 @@ def hub(command, args, user, comment, number, branch, sort, open, label, repo):
     elif command == "render":
         render()
 
-    elif command == "fetch":
-        fetch_forks(args)
+    elif command == "list":
+        list_pr_url()
 
     else:
         print("invalid command")
