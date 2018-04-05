@@ -529,6 +529,8 @@ def find_issue_info(username, repo, issue, token):
 
 
 def list_pr_url():
+    """Prints out a link to a list of all PRs for the current repo.
+    """
     username, repo, remotes = login()
     click.echo("https://github.com/{username}/{repo}/pulls")
 
