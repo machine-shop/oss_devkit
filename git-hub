@@ -89,7 +89,7 @@ def pr(num):
         The number of the pull request.
     """
     username, repo = login()
-    token = getToken()
+    token = get_token()
 
     # gets pr and runs command.
     try:
@@ -798,11 +798,33 @@ def json_to_toml(username, repo, pr, token, open_or_closed):
     return to_write
 
 
+def checkout(url):
+    num = url.split("/")[-1]
+    user = url.split("/")[-4]
+    repo = url.split("/")[-3]
+    token = get_token()
+    url = 'https://api.github.com/repos/{0}/{1}/pulls/{2}'.format(user, repo, num)
+    request = Request(url)
+    request.add_header('Authorization', 'token %s' % token)
+    response = urlopen(request)
+    response = json.loads(response.read().decode('utf-8'))
+    branch = response.get('head').get('ref')
+
+    p = subprocess.run(["git", "branch"], stdout=subprocess.PIPE)
+    remotes = str(p.stdout.decode("utf-8").strip('\n'))
+    if "PR_{num}" not in remotes:
+        p = subprocess.run(["git", "fetch", "origin", f'refs/pull/{num}/head:PR_{num}'])
+        p = subprocess.run(["git", "branch", f'--set-upstream-to=upstream/{branch}', f'PR_{num}'])
+    else:
+        p = subprocess.run(["git", "checkout", f'PR_{num}'])
+        p = subprocess.run(["git", "pull"])
+
+
 def sync():
     """Updates and saves pull-requests in pull-requests.toml in the .git folder. """
-    username, repo = login()
-    token = getToken()
-
+    username, repo, remotes = login()
+    token = get_token()
+    print("Syncing information.... this could take a while")
     # saves pr into toml file
     try:
         g = github.Github(token)
@@ -812,9 +834,8 @@ def sync():
         if not os.path.isdir(path_github):
             os.makedirs(path_github)
         if not os.path.isfile(path_prs):
-            os.makeFile(path_prs)
-
-        f = open(path_prs, "w")
+            f = open(path_prs,"w+")
+        f = open(path_prs, "w+")
         to_write = "[['open pull requests']]\n"   # later will be convereted to toml to store
     except github.BadCredentialsException as e:
         print(e)
@@ -824,12 +845,18 @@ def sync():
     # creates dictionaries in toml format as we scan though pull requests
     open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
     for pr in open_prs:
-        to_write = to_write + json_to_toml(username, repo, pr, token, "open")
-    to_write = to_write[:-2]+'\n'
-    to_write = to_write + "[['closed pull requests']] \n"
+        to_write = to_write + find_pr_info(username, repo, pr, token, "open")
+    to_write = to_write[:-1]+'\n'
+    to_write = to_write + "['closed pull requests'] \n"
     closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
     for pr in closed_prs:
-        to_write = to_write + json_to_toml(username, repo, pr, token, "closed")
+        to_write = to_write + find_pr_info(username, repo, pr, token, "closed")
+
+    issues = g.get_user(username).get_repo(repo).get_issues()
+    to_write = to_write + "['issues'] \n"
+    for issue in issues:
+        if f"pull requests'.{issue.number}" not in to_write:
+            to_write = to_write + find_issue_info(username, repo, issue, token)
     # converts it to toml and stores in file
     toml_string = toml.loads(to_write)
     toml.dump(toml_string, f)
@@ -875,6 +902,9 @@ def hub(command, args, user, comment, number, branch, sort, opened, label):
 
     elif command == "render":
         render()
+
+    elif command == "checkout":
+        checkout(str(args[0]))
 
     else:
         print("invalid command")

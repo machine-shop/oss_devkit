@@ -41,13 +41,14 @@ def week_old_comments():
     return opened, url
 
 
-def week_old_comments_helper(prs):
+def week_old_comments_helper(multiple_prs):
     """Helper function that finds all PRs in a dictionary that are over a week old
     """
     all_prs = []
     url = []
-    for num in list(prs.keys()):
-        pr = prs[num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         if(pr['most_recent'] == ""):
             all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
         else:
@@ -92,15 +93,16 @@ def oldest_prs():
     return oldest, url
 
 
-def oldest_prs_helper(prs):
+def oldest_prs_helper(multiple_prs):
     """Helper function that finds oldest prs"""
     oldest = []
     url = []
     q = PriorityQueue(maxsize=3)
     old = timedelta()
     now = datetime.now()
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         if now-parse_time(pr['created_at']) > old:
             if q.qsize() == 3:
                 q.get()
@@ -130,13 +132,14 @@ def most_active_prs():
     return most_popular, url
 
 
-def most_active_prs_helper(prs):
+def most_active_prs_helper(multiple_prs):
     """helper function to find pull requests."""
     popular = []
     url = []
     q = PriorityQueue()
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         recent_comment_count = recent_comments(pr)
         q.put(-recent_comment_count)
 
@@ -179,14 +182,15 @@ def no_discussion_prs():
     return opened, url
 
 
-def no_discussion_helper(prs):
+def no_discussion_helper(multiple_prs):
     """helper function to find pull requests."""
     no_disc_prs = []
     url = []
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         if pr['comment_count'] == "0":
-            no_disc_prs.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
+            no_disc_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
     return no_disc_prs, url
 
@@ -204,14 +208,15 @@ def prs_with_me():
     return opened, url
 
 
-def find_prs_with_me(prs):
+def find_prs_with_me(multiple_prs):
     """helper function to find pull requests."""
     prs_with_me = []
     url = []
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         if pr['self_comment'] == "True":
-            prs_with_me.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
+            prs_with_me.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
     return prs_with_me, url
 
@@ -229,14 +234,15 @@ def unmergeable():
     return opened, url
 
 
-def find_unmergeable_prs(prs):
+def find_unmergeable_prs(multiple_prs):
     """helper function to find pull requests."""
     unmergeable_prs = []
     url = []
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         if pr['mergeable'] == "False":
-            unmergeable_prs.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
+            unmergeable_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
     return unmergeable_prs, url
 
@@ -327,25 +333,26 @@ def popular_ticket():
     return popular, urls
 
 
-def find_popular_tickets(opened, issues):
+def find_popular_tickets(multiple_prs, issues):
     """helper function to find popular tickets"""
     tickets = {}
-    for num in opened:
-        pr = opened[num]
+    for prs in multiple_prs:
+        pr = prs[list(prs.keys())[0]]
+        num = list(prs.keys())[0]
         referred_tickets_in_prs = tickets_referred(pr['comment_content'])
         for ticket in referred_tickets_in_prs:
             if ticket in tickets:
                 tickets[ticket] += 1
             else:
                 tickets[ticket] = 1
-    for num in issues:
-        issue = issues[num]
-        referred_tickets_in_tickets = tickets_referred(issue['comment_body'])
-        for ticket in referred_tickets_in_prs:
-            if ticket in tickets:
-                tickets[ticket] += 1
-            else:
-                tickets[ticket] = 1
+    # for num in issues:
+    #     issue = issues[num]
+    #     referred_tickets_in_tickets = tickets_referred(issue['comment_body'])
+    #     for ticket in referred_tickets_in_prs:
+    #         if ticket in tickets:
+    #             tickets[ticket] += 1
+    #         else:
+    #             tickets[ticket] = 1
     q = PriorityQueue()
     for ticket in list(tickets.keys()):
         q.put(-tickets[ticket])
@@ -376,10 +383,9 @@ def main():
     popular_tickets, popular_tickets_url = popular_ticket()
 
     path_git = path_to_git()
-    path_pic = path_pic = pjoin(path_git, "git-hub/PRs.png")
-    if os.path.exists(path_pic):
-        return path_pic
-    return None
+    picture = pjoin(path_git, "git-hub/PRs.png")
+    if not os.path.exists(picture):
+        picture = None
 
     file_path = os.path.dirname(__file__)
     complete_path = os.path.join(file_path, 'templates/template.html')
