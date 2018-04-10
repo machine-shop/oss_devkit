@@ -438,7 +438,8 @@ def find_pr_info(username, repo, pr, token, open_or_closed):
                  for assignee in list(response.get('assignees'))]
     labels = [label.get('name') for label in list(labels_dict)]
     comment_dates = [c.get('updated_at') for c in list(comment_dict)]
-
+    if(pr.number % 5 == 0):
+        print("Syncing PR ", pr.number)
     to_write = f"""
     ['{open_or_closed} pull requests'.{pr.number}]\n
     title = "{repr(response.get('title'))}" \n
@@ -843,10 +844,13 @@ def sync():
         sys.exit(1)
 
     # creates dictionaries in toml format as we scan though pull requests
+    print("Syncing OPEN pull requests")
     open_prs = g.get_user(username).get_repo(repo).get_pulls("open")
     for pr in open_prs:
         to_write = to_write + find_pr_info(username, repo, pr, token, "open")
     to_write = to_write[:-1]+'\n'
+
+    print("Syncing CLOSED pull requests")
     to_write = to_write + "['closed pull requests'] \n"
     closed_prs = g.get_user(username).get_repo(repo).get_pulls("closed")
     for pr in closed_prs:
@@ -858,6 +862,7 @@ def sync():
         if f"pull requests'.{issue.number}" not in to_write:
             to_write = to_write + find_issue_info(username, repo, issue, token)
     # converts it to toml and stores in file
+    print(to_writeg)
     toml_string = toml.loads(to_write)
     toml.dump(toml_string, f)
 
