@@ -150,8 +150,6 @@ def execute():
     print('Processing %d pull requests...' % len(nrs))
     # All the dates a PR was created
     dates = [dateutil.parser.parse(pr['created_at']) for pr in PRs]
-    print([pr['title'] for pr in PRs])
-    print(dates)
 
     # Finds all the release dates (tags)
     p = subprocess.run(["git", "log", "--tags", "--simplify-by-decoration", "--pretty='format:%ai %d'"], stdout=subprocess.PIPE)
@@ -169,7 +167,7 @@ def execute():
         releases[r] = dateutil.parser.parse(releases[r])
 
     # How many months we want to plot, difference between first PR and now
-    month_duration = abs(diff_month(dates[0], datetime.now(tz=dates[0].tzinfo)))
+    month_duration = abs(diff_month(min(dates), datetime.now(tz=dates[0].tzinfo)))
 
     # First PR
     epoch = min(dates)
@@ -179,7 +177,6 @@ def execute():
     bins.sort()
     fig, ax = plt.subplots(figsize=(7, 5))
     n, bins, _ = ax.hist(dates_f, bins=bins, color='blue', alpha=0.6)
-
     tick_space = math.ceil(diff_month(datetime.now(tz=dates[0].tzinfo), epoch)/10)
 
     ax.xaxis.set_major_formatter(FuncFormatter(date_formatter))

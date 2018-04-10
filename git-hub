@@ -862,7 +862,7 @@ def sync():
         if f"pull requests'.{issue.number}" not in to_write:
             to_write = to_write + find_issue_info(username, repo, issue, token)
     # converts it to toml and stores in file
-    print(to_writeg)
+    print(to_write)
     toml_string = toml.loads(to_write)
     toml.dump(toml_string, f)
 
