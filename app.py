@@ -306,6 +306,7 @@ def find_closed_pr_refer_ticket(closed_prs, issues):
     """helper function to find closed prs that reference open issues"""
     unresolved_issues = []
     urls = []
+    closed_prs = closed_prs[0]
     for num in closed_prs:
         pr = closed_prs[num]
         referred_tickets = tickets_referred(pr['comment_content'])
