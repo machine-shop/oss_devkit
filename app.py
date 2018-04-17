@@ -392,11 +392,13 @@ def main():
     complete_path = os.path.join(file_path, 'templates/template.html')
     style = os.path.join(file_path, 'templates/style.css')
     script = os.path.join(file_path, 'templates/script.js')
+    down = os.path.join(file_path, 'templates/down.png')
+    right = os.path.join(file_path, 'templates/right.png')
     path, filename = os.path.split(complete_path)
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(path or './'))
     template = env.get_template(filename)
     out = template.render({'style': style, 'script': script, 'picture': picture, 'issues_no_comments': issues_no_comments, 'closed_pr_refer_tickets': closed_pr_refer_tickets, 'popular_tickets': popular_tickets, 'week_old': week_old, 'no_discussion': no_discussion, 'active_prs': most_active, 'oldest_prs': oldest_pr, 'my_prs': my_prs, 'unmergeable_prs': unmergeable_prs,
-     'issues_no_comments_url': issues_no_comments_url, 'closed_pr_refer_tickets_url': closed_pr_refer_tickets_url, 'popular_tickets_url': popular_tickets_url, 'week_old_url': week_old_url, 'no_discussion_url': no_discussion_url, 'active_prs_url': most_active_url, 'oldest_prs_url': oldest_pr_url, 'my_prs_url': my_prs_url, 'unmergeable_prs_url': unmergeable_prs_url})
+     'issues_no_comments_url': issues_no_comments_url, 'closed_pr_refer_tickets_url': closed_pr_refer_tickets_url, 'popular_tickets_url': popular_tickets_url, 'week_old_url': week_old_url, 'no_discussion_url': no_discussion_url, 'active_prs_url': most_active_url, 'oldest_prs_url': oldest_pr_url, 'my_prs_url': my_prs_url, 'unmergeable_prs_url': unmergeable_prs_url, 'down': down, 'right': right})
     fname = "./output.html"
     print("Template rendered at output.html")
     with open(fname, 'w') as f:

@@ -18,6 +18,7 @@ body {
 #center-header{
   text-align: left;
   font-size: 1.5em;
+  display: inline-block;
 }
 #description{
   text-align: left;
@@ -57,4 +58,68 @@ ul {
 }
 #refer-div{
   display: block;
+}
+
+#opened-refer{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-pop-ticket{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-unmergeable{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-my-prs{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-oldest-prs{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-active-prs{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-no-diss{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
+}
+
+#opened-week-old{
+  width: 0.8em;
+  height: 1.3em;
+  display: inline-block;
+  margin-right: 0.5em;
+  margin-top: -0.8em;
 }

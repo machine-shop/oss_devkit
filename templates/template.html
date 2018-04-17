@@ -14,7 +14,8 @@
     </div>
     {% endif %}
     <div class="center-containers">
-      <div class="container" onclick="btn_click('week-old-div');">
+      <div class="container" onclick="btn_click('week-old-div', 'opened-week-old', '{{down}}', '{{right}}');">
+          <img src="{{down}}" id="opened-week-old">
           <h3 id="center-header"> All PRs without comments in over a week: </h3>
           <h5 id="description"> All open PRs that have not been commented on by anybody in over a week. </h5>
         <ul id="week-old-div">
@@ -24,7 +25,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('no-diss-div');">
+      <div class="container" onclick="btn_click('no-diss-div', 'opened-no-diss', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-no-diss">
           <h3 id="center-header"> All PRs without discussion: </h3>
           <h5 id="description"> All open PRs that haven't been commented on by anybody before. </h5>
         <ul id="no-diss-div">
@@ -34,7 +36,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('active-prs-div');">
+      <div class="container" onclick="btn_click('active-prs-div', 'opened-active-prs', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-active-prs">
           <h3 id="center-header"> PRs with most active comments: </h3>
           <h5 id="description"> Finds the top 3 PRs with the most comments by anybody. </h5>
         <ul id="active-prs-div">
@@ -44,7 +47,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('oldest-prs-div');">
+      <div class="container" onclick="btn_click('oldest-prs-div', 'opened-oldest-prs', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-oldest-prs">
           <h3 id="center-header"> Oldest unmerged PRs: </h3>
           <h5 id="description"> Finds the 3 oldest PRs that haven't been merged, sorted by date. </h5>
         <ul id="oldest-prs-div">
@@ -54,7 +58,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('my-prs-div');">
+      <div class="container" onclick="btn_click('my-prs-div', 'opened-my-prs', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-my-prs">
           <h3 id="center-header"> All PRs that I've commented on: </h3>
           <h5 id="description"> Lists all PRs that the current user has commented on. </h5>
         <ul id="my-prs-div">
@@ -64,7 +69,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('unmergeable-div');">
+      <div class="container" onclick="btn_click('unmergeable-div', 'opened-unmergeable', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-unmergeable">
           <h3 id="center-header"> All unmergeable PRs: </h3>
           <h5 id="description"> Lists all PRs that have merge conflicts and need to be manually merged. </h5>
         <ul id="unmergeable-div">
@@ -76,7 +82,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('pop-ticket-div');">
+      <div class="container" onclick="btn_click('pop-ticket-div', 'opened-pop-ticket', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-pop-ticket">
           <h3 id="center-header"> Most popular tickets: </h3>
           <h5 id="description"> List of top 3 tickets with the most comment activity.  </h5>
         <ul id="pop-ticket-div">
@@ -88,7 +95,8 @@
         </ul>
       </div>
 
-      <div class="container" onclick="btn_click('refer-div');">
+      <div class="container" onclick="btn_click('refer-div', 'opened-refer', '{{down}}', '{{right}}');">
+        <img src="{{down}}" id="opened-refer">
           <h3 id="center-header"> Most referred tickets: </h3>
           <h5 id="description"> Finds open issues that are referred to from closed PRs. </h5>
         <ul id="refer-div">
