@@ -378,8 +378,8 @@ def main():
 
     path_git = path_to_git()
     path_pic = path_pic = pjoin(path_git, "git-hub/PRs.png")
-    if os.path.exists(path_pic):
-        return path_pic
+    if not os.path.exists(path_pic):
+        path_pic = None
 
     file_path = os.path.dirname(__file__)
     complete_path = os.path.join(file_path, 'templates/template.html')
