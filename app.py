@@ -47,8 +47,8 @@ def week_old_comments_helper(multiple_prs):
     all_prs = []
     url = []
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         if(pr['most_recent'] == ""):
             all_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["comment"]}')
         else:
@@ -101,8 +101,8 @@ def oldest_prs_helper(multiple_prs):
     old = timedelta()
     now = datetime.now()
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         if now-parse_time(pr['created_at']) > old:
             if q.qsize() == 3:
                 q.get()
@@ -110,8 +110,8 @@ def oldest_prs_helper(multiple_prs):
             old = q.get()
             q.put(old)
 
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for pr_num in list(multiple_prs.keys()):
+        pr = multiple_prs[pr_num]
         if now-parse_time(pr['created_at']) > old:
             days = str(now-parse_time(pr['created_at']))[:8]
             oldest.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]} --  {days}')
@@ -138,8 +138,8 @@ def most_active_prs_helper(multiple_prs):
     url = []
     q = PriorityQueue()
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         recent_comment_count = recent_comments(pr)
         q.put(-recent_comment_count)
 
@@ -149,8 +149,8 @@ def most_active_prs_helper(multiple_prs):
         most_comments.add(-q.get())
         count += 1
     most_comments.discard(0)
-    for pr_num in list(prs.keys()):
-        pr = prs[pr_num]
+    for pr_num in list(multiple_prs.keys()):
+        pr = multiple_prs[pr_num]
         recent_comment_count = recent_comments(pr)
         if recent_comment_count in most_comments:
             popular.append(f'PR #{pr_num}: {pr["user"]}/{pr["branch"]}: {pr["title"]} -- {recent_comment_count} comment(s)')
@@ -187,8 +187,8 @@ def no_discussion_helper(multiple_prs):
     no_disc_prs = []
     url = []
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         if pr['comment_count'] == "0":
             no_disc_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
@@ -213,8 +213,8 @@ def find_prs_with_me(multiple_prs):
     prs_with_me = []
     url = []
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         if pr['self_comment'] == "True":
             prs_with_me.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
@@ -239,8 +239,8 @@ def find_unmergeable_prs(multiple_prs):
     unmergeable_prs = []
     url = []
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         if pr['mergeable'] == "False":
             unmergeable_prs.append(f'PR #{num}: {pr["user"]}/{pr["branch"]}: {pr["title"]}')
             url.append(pr["url"])
@@ -337,8 +337,8 @@ def find_popular_tickets(multiple_prs, issues):
     """helper function to find popular tickets"""
     tickets = {}
     for prs in multiple_prs:
-        pr = prs[list(prs.keys())[0]]
-        num = list(prs.keys())[0]
+        pr = multiple_prs[prs]
+        num = prs
         referred_tickets_in_prs = tickets_referred(pr['comment_content'])
         for ticket in referred_tickets_in_prs:
             if ticket in tickets:
