@@ -308,61 +308,44 @@ def find_match(open_or_closed, list_of_dictionaries,
     """
     appeared_before = False
     all_prs = {}
-    for dictionary_key in list_of_dictionaries:
-        dictionary = list_of_dictionaries[dictionary_key]
-        # for sub_keys in list(dictionary.keys()):
-        #     # sub_dict = dictionary[sub_keys]
-        #     print(type(list(sub_dict.values())[0]))
-        #     # print(" ".join(list(sub_dict.values())))
-        # [print(type(item)) for item in list(dictionary.values())]
-        if keyword:         # checks keyword
-            concate = list(dictionary.values())
-            concate_upper = ""
-            for elem in concate:
-                if type(elem) == str:
-                    concate_upper += elem.upper()
-                else:
-                    for item in elem:
-                        concate_upper += item.upper()
-            if keyword.upper() in concate_upper:
-                appeared_before = True
-                if (open_or_closed):
-                    all_prs[dictionary['modified']] = (
-                        f'{dictionary_key} '
-                        f'{ansi.GREEN} "O" {ansi.CLOSE}'
-                        f'{dictionary["user"]}/{dictionary["branch"]}'
-                        f' {dictionary["comment"]}')
-                else:
-                    all_prs[dictionary['modified']] = (
-                        f'{dictionary_key} {ansi.RED} "C"'
-                        f'{ansi.CLOSE} {dictionary["user"]}/'
-                        f'{dictionary["branch"]} {dictionary["comment"]}')
-        else:               # checks for all other parameters
-            temp_user = dictionary['user']
-            temp_branch = dictionary["branch"]
-            comment_list = dictionary["comment"]
-            temp_comment = ""
-            for elem in comment_list:
-                temp_comment += elem
-            label_list = dictionary["labels"]
-            temp_label = ""
-            for elem in label_list:
-                temp_label += elem
-            if (label.upper() in temp_label.upper() and comment.upper()
-                    in temp_comment.upper() and user.upper()
-                    in temp_user.upper() and branch.upper()
-                    in temp_branch.upper()):
-                appeared_before = True
-                if (open_or_closed):
-                    all_prs[dictionary['modified']] = (
-                        f'{dictionary_key} {ansi.GREEN} "O"'
-                        f'{ansi.CLOSE} {dictionary["user"]}/'
-                        f'{dictionary["branch"]} {dictionary["comment"]}')
-                else:
-                    all_prs[dictionary['modified']] = (
-                        f'{dictionary_key} {ansi.RED} "C" '
-                        f'{ansi.CLOSE} {dictionary["user"]}/'
-                        f'{dictionary["branch"]} {dictionary["comment"]}')
+     for dictionary in list_of_dictionaries:
+        for sub_keys in list(dictionary.keys()):
+            sub_dict = dictionary[sub_keys]
+            if keyword:         # checks keyword
+                concate = " ".join(sub_dict.values())
+                if keyword.upper() in concate.upper():
+                    appeared_before = True
+                    if(open_or_closed):
+                        all_prs[sub_dict['modified']] = (
+                            f'{sub_keys} '
+                            f'{ansi.GREEN} "O" {ansi.CLOSE}'
+                            f'{sub_dict["user"]}/{sub_dict["branch"]}'
+                            f' {sub_dict["comment"]}')
+                    else:
+                        all_prs[sub_dict['modified']] = (
+                            f'{sub_keys} {ansi.RED} "C"'
+                            f'{ansi.CLOSE} {sub_dict["user"]}/'
+                            f'{sub_dict["branch"]} {sub_dict["comment"]}')
+            else:               # checks for all other parameters
+                temp_user = sub_dict['user']
+                temp_branch = sub_dict["branch"]
+                temp_comment = sub_dict["comment"]
+                temp_label = sub_dict["labels"]
+                if (label.upper() in temp_label.upper() and comment.upper()
+                        in temp_comment.upper() and user.upper()
+                        in temp_user.upper() and branch.upper()
+                        in temp_branch.upper()):
+                    appeared_before = True
+                    if(open_or_closed):
+                        all_prs[sub_dict['modified']] = (
+                            f'{sub_keys} {ansi.GREEN} "O"'
+                            f'{ansi.CLOSE} {sub_dict["user"]}/'
+                            f'{sub_dict["branch"]} {sub_dict["comment"]}')
+                    else:
+                        all_prs[sub_dict['modified']] = (
+                            f'{sub_keys} {ansi.RED} "C" '
+                            f'{ansi.CLOSE} {sub_dict["user"]}/'
+                            f'{sub_dict["branch"]} {sub_dict["comment"]}')
     return appeared_before, all_prs
 
 
