@@ -552,6 +552,14 @@ def sync():
     toml.dump(toml_string, f)
 
 
+def render():
+    try:
+        plot_pr.execute()
+    except ImportError:
+        print("Matplotlib not installed, cannot render image. Continuing without image.")
+    app.main()
+
+
 @click.group()
 def cli():
     pass
