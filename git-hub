@@ -479,34 +479,31 @@ def find_issue_info(issue, token):
     return textwrap.dedent(to_write)
 
 
-def fetch_forks(lst_remotes):
+def fetch_forks(all_remotes):
     """Adds all the listed forks as remotes, where each username is the remote
        name.
 
-       Parameters
-       ----------
-       list_remotes : array
-           list of all fork usernames
+    Parameters
+    ----------
+    remotes : tuple
+        tuple of all fork usernames
     """
     username, repo, remotes = login()
     token = get_token()
     try:
         g = github.Github(token)
-
         curr_remotes = []
-        p = subprocess.Popen(["git", "remote"], stdout=subprocess.PIPE)
-        # p.communicate()
-        curr_remotes = p.stdout.read().decode('UTF-8').split('\n')
-        for remote in lst_remotes:
+        p = subprocess.run(["git", "remote"], stdout=subprocess.PIPE)
+        curr_remotes = p.stdout.decode('UTF-8').split('\n')
+        for remote in all_remotes:
             if remote not in curr_remotes:
-                p = subprocess.Popen(["git", "remote", "add", remote,
+                p = subprocess.run(["git", "remote", "add", remote,
                                      f'git@github.com:{remote}/{repo}'])
 
         cmd = ["git", "fetch", "--multiple"]
-        for remote in lst_remotes:
+        for remote in all_remotes:
             cmd.append(remote)
-        p = subprocess.Popen(cmd)
-        p.communicate()
+        p = subprocess.run(cmd)
 
     except github.BadCredentialsException as e:
         print(e)
@@ -592,6 +589,16 @@ def cli():
 @click.option('--label', '-l', default="", help="search PR by label")
 @click.option('--repo', '-r', default="", help="push to given repo")
 def hub(command, args, user, comment, number, branch, sort, open, label, repo):
+    '''Main function that parses users command and calls functionsself.
+
+    Parameters
+    ----------
+    command : string
+        command that user wants to execute
+    args : list
+        all additional parameters user passes in to specify command
+        (ie. git hub info 3 -> args is [3])
+    '''
     if command == "pr":
         pr_num = int(args[0])
         pr(pr_num)
