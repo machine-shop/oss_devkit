@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from os.path import join as pjoin
 import ansi
+import re
 
 
 def login():
@@ -19,7 +20,6 @@ def login():
     For example consider running 'git remote -v' and getting back:
         origin  git@github.com:test_user/test_repo.git (fetch)
         origin git@github.com:test_user/test_repo.git (push)
-
     Returns
     -------
     username : string
@@ -28,7 +28,6 @@ def login():
         origin repository of the github user, i.e. test_repo
     remotes : string
         Git remotes: the output of 'git remote -v'
-
     """
     process = subprocess.Popen(["git", "remote", "-v"], stdout=subprocess.PIPE)
     remotes = str(process.stdout.read())
@@ -42,7 +41,6 @@ def login():
 
 def get_token():
     """Retrieve token from configuration file.
-
     Returns
     -------
     token : string
@@ -61,26 +59,20 @@ def get_token():
     else:
         print(textwrap.dedent("""\
             No authentication token specified in: ~/.config/git-hub.yaml
-
             Please see
-
               https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
-
             for instruction on obtaining a token. Then update the configuration
             file as follows:
-
               token = abc123
         """))
         sys.exit(1)
 
 def pr(num):
     """Pulls down and checkout the branch of the pr.
-
     This will run the following commands in the terminal:
     "git remote add user git@github.com:user/repo",
     "git fetch user",
     "git checkout -b pr/num user/branch"
-
     Parameters
     ----------
     num : integer
@@ -121,10 +113,8 @@ def pr(num):
 
 def push():
     """Pushes changes back to a branch.
-
     This will run the following command:
     "git push user pr/num:branch"
-
     """
     p = subprocess.Popen(["git", "branch"], stdout=subprocess.PIPE)
     pr = str(p.stdout.read())
@@ -169,7 +159,6 @@ def path_to_toml():
 
 def find_in_dictionary(pr_id, pr_data):
     """Fetches all the information on a certain PR
-
     Parameters
     ----------
     pr_id : integer
@@ -186,7 +175,6 @@ def find_in_dictionary(pr_id, pr_data):
 
 def get_info(pr_data):
     """Fetches all the information on a certain PR
-
     Parameters
     ----------
     pr_data : integer
@@ -236,7 +224,6 @@ def get_info(pr_data):
 def parse_time(time):
     """
     Converts time into python datetime object
-
     Parameters
     ----------
     time : String
@@ -258,7 +245,6 @@ def parse_time(time):
 def print_in_order(dict, increasing=False):
     """
     Prints items in q sorted by order given by sort
-
     Parameters
     ----------
     Q : PriorityQueue
@@ -280,7 +266,6 @@ def find_match(open_or_closed, list_of_dictionaries,
                keyword, user, comment, number, branch, label):
     """Helper function that finds all matches in the
        given dictionary that fits the specified parameters.
-
     Parameters
     ----------
     open_or_closed : boolean
@@ -297,7 +282,6 @@ def find_match(open_or_closed, list_of_dictionaries,
         Search by PR number
     branch : string
         Search by PR branch
-
     Returns
     ----------
     appeared_before : boolean
@@ -351,9 +335,7 @@ def find_match(open_or_closed, list_of_dictionaries,
 def search(keyword, user, comment, number,
            branch, opened_or_closed, label, sort):
     """Searches open and closed pull request comments for specified keyword.
-
     Opens pull-requests.toml file in .git folder to fetch pull requests.
-
     Parameters
     ----------
     keyword : string
@@ -399,7 +381,6 @@ def search(keyword, user, comment, number,
 def find_pr_info(pr, repo, token, open_or_closed):
     """Helper function that finds all the information we want to record from the
     pull requests from the API and converts it to toml format syntax
-
     Parameters
     ----------
     pr : object
@@ -469,7 +450,6 @@ def find_issue_info(issue, token):
     """Helper function that finds all the information
        we want to record from the issues
        from the API and converts it to toml format syntax.
-
     Parameters
     ----------
     issue : object
@@ -543,7 +523,8 @@ def render():
     try:
         plot_pr.execute()
     except ImportError:
-        print("Matplotlib not installed, cannot render image. Continuing without image.")
+        print("Matplotlib not installed, cannot render image.")
+        print("Continuing without image.")
     app.main()
 
 
@@ -574,7 +555,13 @@ def cli():
 @click.option('--label', '-l', default="", help="search PR by label")
 def hub(command, args, user, comment, number, branch, sort, open, label):
     if command == "pr":
-        pr_num = int(args[0])
+        # if user inputs the pull request number
+        if args[0].isdigit():
+            pr_num = int(args[0])
+        # if user inputs the url of the pull request
+        else:
+            mo = re.search(r'https://github.com/(?P<org_name>.*)/(?P<repo>.*)/pull/(?P<pr_num>\d*)(/*)', args[0])
+            pr_num = int((mo.group('pr_num')))
         pr(pr_num)
 
     elif command == "push":
